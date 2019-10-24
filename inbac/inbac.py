@@ -56,17 +56,20 @@ class Application(tk.Frame):
         
         self.master.geometry("800x600")
         self.master.update()
-        self.load_image_from_file(self.files[self.current_file])
+        self.original_image = self.load_image_from_file(self.files[self.current_file])
+        self.display_image_on_canvas(self.original_image)
+        self.image_canvas.bind('<Configure>', self.on_resize)
 
     def load_image_from_file(self, filename):
+        return Image.open(os.path.join(self.input_directory, filename))
+
+    def display_image_on_canvas(self, image):
         self.clear_canvas(self.image_canvas)
-        
-        self.original_image = Image.open(os.path.join(self.input_directory, filename))
-        self.width = self.original_image.size[0]
-        self.height = self.original_image.size[1]
-        if self.width > self.master.winfo_width() or self.height > self.master.winfo_height():
-            width_ratio = float(self.master.winfo_width()) / self.width
-            height_ratio = float(self.master.winfo_height()) / self.height
+        self.width = image.size[0]
+        self.height = image.size[1]
+        if self.width > self.image_canvas.winfo_width() or self.height > self.image_canvas.winfo_height():
+            width_ratio = float(self.image_canvas.winfo_width()) / float(self.width)
+            height_ratio = float(self.image_canvas.winfo_height()) / float(self.height)
             ratio = min(width_ratio, height_ratio)
             self.width = int(float(self.width) * float(ratio))
             self.height = int(float(self.height) * float(ratio))
@@ -81,6 +84,9 @@ class Application(tk.Frame):
         if self.canvas_image is not None:
             widget.delete(self.canvas_image)
             self.canvas_image = None
+
+    def on_resize(self, event=None):
+        self.display_image_on_canvas(self.original_image)
 
     def save_next(self, event=None):
         self.save()
@@ -103,13 +109,15 @@ class Application(tk.Frame):
         if self.current_file + 1 >= len(self.files):
             return
         self.current_file += 1
-        self.load_image_from_file(self.files[self.current_file])
+        self.original_image = self.load_image_from_file(self.files[self.current_file])
+        self.display_image_on_canvas(self.original_image)
 
     def previous_image(self, event=None):
         if self.current_file - 1 < 0:
             return
         self.current_file -= 1
-        self.load_image_from_file(self.files[self.current_file])
+        self.original_image = self.load_image_from_file(self.files[self.current_file])
+        self.display_image_on_canvas(self.original_image)
 
     def on_mouse_down(self, event):
         self.mouse_press_coord = (event.x, event.y)
@@ -149,7 +157,10 @@ class Application(tk.Frame):
 
         if fixed_aspect_ratio:
             aspect_ratio = float(aspect_ratio_x)/float(aspect_ratio_y)
-            selection_box = self.get_selection_box_for_aspect_ratio(selection_box, aspect_ratio)
+            try:
+                selection_box = self.get_selection_box_for_aspect_ratio(selection_box, aspect_ratio)
+            except ZeroDivisionError:
+                pass
         
         return tuple((lambda x: int(round(x)))(x) for x in selection_box)
 
@@ -157,21 +168,18 @@ class Application(tk.Frame):
         selection_box = list(selection_box)
         width = selection_box[2] - selection_box[0]
         height = selection_box[3] - selection_box[1]
-        try:
-            if float(width)/float(height) > aspect_ratio:
-                height = width / aspect_ratio
-                if self.mouse_move_coord[1] > self.mouse_press_coord[1]:
-                    selection_box[3] = selection_box[1] + height
-                else:
-                    selection_box[1] = selection_box[3] - height
+        if float(width)/float(height) > aspect_ratio:
+            height = width / aspect_ratio
+            if self.mouse_move_coord[1] > self.mouse_press_coord[1]:
+                selection_box[3] = selection_box[1] + height
             else:
-                width = height * aspect_ratio
-                if self.mouse_move_coord[0] > self.mouse_press_coord[0]:
-                    selection_box[2] = selection_box[0] + width
-                else:
-                    selection_box[0] = selection_box[2] - width
-        except ZeroDivisionError:
-            pass
+                selection_box[1] = selection_box[3] - height
+        else:
+            width = height * aspect_ratio
+            if self.mouse_move_coord[0] > self.mouse_press_coord[0]:
+                selection_box[2] = selection_box[0] + width
+            else:
+                selection_box[0] = selection_box[2] - width
         return tuple(selection_box)
 
     @staticmethod
