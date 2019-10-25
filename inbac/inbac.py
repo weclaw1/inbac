@@ -3,37 +3,21 @@ import os
 import itertools
 import tkinter as tk
 import subprocess
+import inbac.parse_arguments as args
+import mimetypes
 from PIL import Image, ImageTk
 
-image_extensions = [".jpg", ".jpeg", ".png", ".bmp"]
-
-output_directory = "crops"
-
-resize_width = 256
-resize_height = 256
-
-fixed_aspect_ratio = True
-aspect_ratio_x = 1
-aspect_ratio_y = 1
-
-selection_box_color = "black"
-
 class Application(tk.Frame):
-    def __init__(self, master=None):
+    def __init__(self, args, master=None):
         super().__init__(master)
         self.master = master
+        self.args = args
         self.pack(fill=tk.BOTH, expand=tk.YES)
 
-        if len(sys.argv) > 1:
-            self.input_directory = sys.argv[1]
-        else:
-            self.input_directory = os.getcwd()
+        self.files = self.load_images(self.args.input_dir)
 
-        self.files = self.load_images(self.input_directory)
-
-        output_directory_path = os.path.join(self.input_directory, output_directory)
-        if not os.path.exists(output_directory_path):
-            os.makedirs(output_directory_path)
+        if not os.path.exists(self.args.output_dir):
+            os.makedirs(self.args.output_dir)
 
         self.selection_box = None
 
@@ -54,14 +38,14 @@ class Application(tk.Frame):
 
         self.current_file = 0
         
-        self.master.geometry("800x600")
+        self.master.geometry(str(self.args.window_size[0]) + "x" + str(self.args.window_size[1]))
         self.master.update()
         self.original_image = self.load_image_from_file(self.files[self.current_file])
         self.display_image_on_canvas(self.original_image)
         self.image_canvas.bind('<Configure>', self.on_resize)
 
     def load_image_from_file(self, filename):
-        return Image.open(os.path.join(self.input_directory, filename))
+        return Image.open(os.path.join(self.args.input_dir, filename))
 
     def display_image_on_canvas(self, image):
         self.clear_canvas(self.image_canvas)
@@ -96,13 +80,14 @@ class Application(tk.Frame):
         if self.selection_box is None:
             return
         filename = self.files[self.current_file]
-        output_directory_path = os.path.join(self.input_directory, output_directory)
         box = self.get_real_box(self.get_selected_box())
-        new_filename = self.find_available_name(output_directory_path, filename)
-        subprocess.run(["convert", os.path.join(self.input_directory, filename),
-                        "-crop", str(box[2] - box[0]) + "x" + str(box[3] - box[1]) + "+" + str(box[0]) + "+" + str(box[1]),
-                        "-resize", str(resize_width) + "x" + str(resize_height),
-                        os.path.join(output_directory_path, new_filename)])
+        new_filename = self.find_available_name(self.args.output_dir, filename)
+        command = ["convert", os.path.join(self.args.input_dir, filename),
+                   "-crop", str(box[2] - box[0]) + "x" + str(box[3] - box[1]) + "+" + str(box[0]) + "+" + str(box[1])]
+        if self.args.resize:
+            command.extend(["-resize", str(self.args.resize[0]) + "x" + str(self.args.resize[1])])
+        command.append(os.path.join(self.args.output_dir, new_filename))
+        subprocess.run(command)
         self.clear_selection_box(self.image_canvas)
 
     def next_image(self, event=None):
@@ -136,7 +121,7 @@ class Application(tk.Frame):
         selected_box = self.get_selected_box()
 
         if self.selection_box is None:
-            self.selection_box = widget.create_rectangle(selected_box, outline=selection_box_color)
+            self.selection_box = widget.create_rectangle(selected_box, outline=self.args.selection_box_color)
         else:
             widget.coords(self.selection_box, selected_box)
         
@@ -155,8 +140,8 @@ class Application(tk.Frame):
         width = selection_bottom_right_x - selection_top_left_x
         height = selection_bottom_right_y - selection_top_left_y
 
-        if fixed_aspect_ratio:
-            aspect_ratio = float(aspect_ratio_x)/float(aspect_ratio_y)
+        if self.args.aspect_ratio is not None:
+            aspect_ratio = float(self.args.aspect_ratio[0])/float(self.args.aspect_ratio[1])
             try:
                 selection_box = self.get_selection_box_for_aspect_ratio(selection_box, aspect_ratio)
             except ZeroDivisionError:
@@ -186,9 +171,9 @@ class Application(tk.Frame):
     def load_images(directory):
         all_images = []
         for filename in os.listdir(directory):
-            _, extension = os.path.splitext(filename)
-            if extension.lower() not in image_extensions: continue
-            all_images.append(filename)
+            filetype, _ = mimetypes.guess_type(filename)
+            if filetype is not None and filetype.split("/")[0] == "image":
+                all_images.append(filename)
         return all_images
 
     @staticmethod
@@ -202,7 +187,7 @@ class Application(tk.Frame):
 
 
 root = tk.Tk()
-app = Application(master=root)
+app = Application(args.parse_arguments(), master=root)
 app.master.title("inbac")
 
 app.mainloop()

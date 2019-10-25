@@ -1,8 +1,16 @@
+import os
 import argparse
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="inbac - interactive batch cropper")
-    parser.add_argument("-f", "--fixed_aspect_ratio", help="selection will have fixed aspect ratio", action="store_value")
-    parser.add_argument("-arx",  "--aspect_ratio_x", type=int, help="aspect ratio x (default 1)", default=1)
-    parser.add_argument("-ary",  "--aspect_ratio_y", type=int, help="aspect ratio y (default 1)", default=1)
-    parser.add_argument("-r",  "--resize", type=int, help="aspect ratio y (default 1)", default=1)
+    parser.add_argument("input_dir", nargs="?", help="input directory (defaults to current working directory)", default=os.getcwd())
+    parser.add_argument("output_dir", nargs="?", help="output directory (defaults to folder crops in input directory)", default=argparse.SUPPRESS)
+    parser.add_argument("-a", "--aspect_ratio", type=int, nargs=2, help="selection should have specified aspect ratio")
+    parser.add_argument("-r", "--resize", type=int, nargs=2, help="cropped image will be resized to specified width and height")
+    parser.add_argument("-s", "--selection_box_color", help="color of the selection box (default is black)", default="black")
+    parser.add_argument("-w", "--window_size", type=int, nargs=2, help="initial window size (default is 800x600)", default=[800, 600])
+
+    args = parser.parse_args()
+    args.output_dir = getattr(args, "output_dir", os.path.join(args.input_dir, "crops"))
+
+    return args
