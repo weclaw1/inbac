@@ -34,6 +34,7 @@ class Application(tk.Frame):
         self.master.bind('<Left>', self.previous_image)
         self.master.bind('<Right>', self.next_image)
         self.master.bind('<ButtonPress-3>', self.next_image)
+        self.master.bind('<ButtonPress-2>', self.previous_image)
         self.master.bind('<ButtonPress-1>', self.on_mouse_down)
         self.master.bind('<B1-Motion>', self.on_mouse_drag)
 
@@ -80,12 +81,10 @@ class Application(tk.Frame):
         filename = os.path.basename(self.images[self.current_file].filename)
         box = self.get_real_box(self.get_selected_box())
         new_filename = self.find_available_name(self.args.output_dir, filename)
-        command = ["convert", os.path.join(self.args.input_dir, filename),
-                   "-crop", str(box[2] - box[0]) + "x" + str(box[3] - box[1]) + "+" + str(box[0]) + "+" + str(box[1])]
+        image = self.images[self.current_file].copy().crop(box)
         if self.args.resize:
-            command.extend(["-resize", str(self.args.resize[0]) + "x" + str(self.args.resize[1])])
-        command.append(os.path.join(self.args.output_dir, new_filename))
-        subprocess.run(command)
+            image = image.resize((self.args.resize[0], self.args.resize[1]), Image.LANCZOS)
+        image.save(os.path.join(self.args.output_dir, new_filename))
         self.clear_selection_box(self.image_canvas)
 
     def next_image(self, event=None):
