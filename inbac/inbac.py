@@ -33,6 +33,7 @@ class Application(tk.Frame):
         self.master.bind('x', self.save)
         self.master.bind('<Left>', self.previous_image)
         self.master.bind('<Right>', self.next_image)
+        self.master.bind('<ButtonPress-3>', self.next_image)
         self.master.bind('<ButtonPress-1>', self.on_mouse_down)
         self.master.bind('<B1-Motion>', self.on_mouse_drag)
 
@@ -42,6 +43,7 @@ class Application(tk.Frame):
         self.master.update()
         self.display_image_on_canvas(self.images[self.current_file])
         self.image_canvas.bind('<Configure>', self.on_resize)
+        self.update_window_title()
 
     def display_image_on_canvas(self, image):
         self.clear_canvas(self.image_canvas)
@@ -82,9 +84,7 @@ class Application(tk.Frame):
                    "-crop", str(box[2] - box[0]) + "x" + str(box[3] - box[1]) + "+" + str(box[0]) + "+" + str(box[1])]
         if self.args.resize:
             command.extend(["-resize", str(self.args.resize[0]) + "x" + str(self.args.resize[1])])
-        print(self.args.output_dir)
         command.append(os.path.join(self.args.output_dir, new_filename))
-        print(command)
         subprocess.run(command)
         self.clear_selection_box(self.image_canvas)
 
@@ -93,12 +93,14 @@ class Application(tk.Frame):
             return
         self.current_file += 1
         self.display_image_on_canvas(self.images[self.current_file])
+        self.update_window_title()
 
     def previous_image(self, event=None):
         if self.current_file - 1 < 0:
             return
         self.current_file -= 1
         self.display_image_on_canvas(self.images[self.current_file])
+        self.update_window_title()
 
     def on_mouse_down(self, event):
         self.mouse_press_coord = (event.x, event.y)
@@ -179,6 +181,9 @@ class Application(tk.Frame):
 
         return images
 
+    def update_window_title(self):
+        self.master.title(os.path.basename(self.images[self.current_file].filename))
+
     @staticmethod
     def find_available_name(directory, filename):
         name, extension = os.path.splitext(filename)
@@ -191,6 +196,5 @@ class Application(tk.Frame):
 
 root = tk.Tk()
 app = Application(args.parse_arguments(), master=root)
-app.master.title("inbac")
 
 app.mainloop()
