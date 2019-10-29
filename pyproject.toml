@@ -10,6 +10,7 @@ pillow = "^6.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
+pylint = "^2.4"
 
 [tool.poetry.scripts]
 inbac = "inbac.inbac:main"

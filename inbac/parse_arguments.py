@@ -1,5 +1,6 @@
-import os
 import argparse
+import os
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="inbac - interactive batch cropper")

@@ -1,11 +1,14 @@
-import sys
-import os
 import itertools
-import tkinter as tk
-import subprocess
-import inbac.parse_arguments as args
 import mimetypes
+import os
+import subprocess
+import sys
+import tkinter as tk
+
 from PIL import Image, ImageTk
+
+import inbac.parse_arguments as args
+
 
 class Application(tk.Frame):
     def __init__(self, args, master=None):
@@ -141,8 +144,6 @@ class Application(tk.Frame):
         selection_bottom_right_x = max(mouse_press_coord[0], mouse_move_coord[0])
         selection_bottom_right_y = max(mouse_press_coord[1], mouse_move_coord[1])
         selection_box = (selection_top_left_x, selection_top_left_y, selection_bottom_right_x, selection_bottom_right_y)
-        width = selection_bottom_right_x - selection_top_left_x
-        height = selection_bottom_right_y - selection_top_left_y
 
         if aspect_ratio is not None:
             aspect_ratio = float(aspect_ratio[0])/float(aspect_ratio[1])

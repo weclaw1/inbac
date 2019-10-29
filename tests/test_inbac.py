@@ -1,8 +1,11 @@
+import os
 import unittest
 import unittest.mock as mock
-import os
-from inbac.inbac import Application
+
 from PIL import Image
+
+from inbac.inbac import Application
+
 
 class TestInbac(unittest.TestCase):
 
