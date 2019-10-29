@@ -15,7 +15,8 @@ class TestInbac(unittest.TestCase):
         filename = "test.jpg"
         mock_path_isfile.return_value = False
 
-        returned_filename = Application.find_available_name(directory, filename)
+        returned_filename = Application.find_available_name(
+            directory, filename)
         mock_path_isfile.assert_called_with(os.path.join(directory, filename))
         self.assertEqual(filename, returned_filename)
 
@@ -26,8 +27,10 @@ class TestInbac(unittest.TestCase):
         new_filename = "test2.jpg"
         mock_path_isfile.side_effect = file_exist
 
-        returned_filename = Application.find_available_name(directory, filename)
-        calls = [mock.call(os.path.join(directory, filename)), mock.call(os.path.join(directory, new_filename))]
+        returned_filename = Application.find_available_name(
+            directory, filename)
+        calls = [mock.call(os.path.join(directory, filename)),
+                 mock.call(os.path.join(directory, new_filename))]
         mock_path_isfile.assert_has_calls(calls)
         self.assertEqual(new_filename, returned_filename)
 
@@ -37,7 +40,7 @@ class TestInbac(unittest.TestCase):
         mouse_move_coord = (15.0, 9.0)
         selection_box = (0.0, 0.0, 15.0, 9.0)
         expected_selection_box = (0.0, 0.0, 16.0, 9.0)
-        returned_selection_box = Application.get_selection_box_for_aspect_ratio(selection_box, aspect_ratio, 
+        returned_selection_box = Application.get_selection_box_for_aspect_ratio(selection_box, aspect_ratio,
                                                                                 mouse_press_coord, mouse_move_coord)
         self.assertEqual(expected_selection_box, returned_selection_box)
 
@@ -45,20 +48,23 @@ class TestInbac(unittest.TestCase):
         mouse_press_coord = (0.0, 0.0)
         mouse_move_coord = (15.0, 9.0)
         expected_selection_box = (0.0, 0.0, 15.0, 9.0)
-        returned_selection_box = Application.get_selected_box(mouse_press_coord, mouse_move_coord, None)
+        returned_selection_box = Application.get_selected_box(
+            mouse_press_coord, mouse_move_coord, None)
         self.assertEqual(expected_selection_box, returned_selection_box)
-    
+
     def test_get_selected_box_returns_correct_selection_box_when_selecting_from_bottom_right_to_upper_left(self):
         mouse_press_coord = (15.0, 9.0)
         mouse_move_coord = (0.0, 0.0)
         expected_selection_box = (0.0, 0.0, 15.0, 9.0)
-        returned_selection_box = Application.get_selected_box(mouse_press_coord, mouse_move_coord, None)
+        returned_selection_box = Application.get_selected_box(
+            mouse_press_coord, mouse_move_coord, None)
         self.assertEqual(expected_selection_box, returned_selection_box)
 
     def test_get_real_box(self):
         selected_box = (2, 2, 4, 4)
         expected_real_box = (4, 4, 8, 8)
-        returned_real_box = Application.get_real_box(selected_box, (10, 10), (5, 5))
+        returned_real_box = Application.get_real_box(
+            selected_box, (10, 10), (5, 5))
         self.assertEqual(expected_real_box, returned_real_box)
 
     @mock.patch('inbac.inbac.os.listdir')
@@ -75,8 +81,10 @@ class TestInbac(unittest.TestCase):
         returned_image = Image.new("RGB", (800, 600))
         mock_image_open.return_value = returned_image
         returned_images = Application.load_images(directory, False)
-        mock_image_open.assert_called_with(os.path.join(directory, mock_listdir.return_value[1]))
+        mock_image_open.assert_called_with(
+            os.path.join(directory, mock_listdir.return_value[1]))
         self.assertListEqual([returned_image], returned_images)
+
 
 def file_exist(x):
     if x == "/home/test/test.jpg":
@@ -84,9 +92,11 @@ def file_exist(x):
     elif x == "/home/test/test2.jpg":
         return False
     return False
-        
+
+
 def main():
     unittest.main(module='tests.test_inbac')
+
 
 if __name__ == '__main__':
     main()

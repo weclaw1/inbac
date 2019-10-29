@@ -17,7 +17,8 @@ class Application(tk.Frame):
         self.args = args
         self.pack(fill=tk.BOTH, expand=tk.YES)
 
-        self.images = self.load_images(self.args.input_dir, self.args.preload_images)
+        self.images = self.load_images(
+            self.args.input_dir, self.args.preload_images)
 
         if not os.path.exists(self.args.output_dir):
             os.makedirs(self.args.output_dir)
@@ -42,8 +43,9 @@ class Application(tk.Frame):
         self.master.bind('<B1-Motion>', self.on_mouse_drag)
 
         self.current_file = 0
-        
-        self.master.geometry(str(self.args.window_size[0]) + "x" + str(self.args.window_size[1]))
+
+        self.master.geometry(
+            str(self.args.window_size[0]) + "x" + str(self.args.window_size[1]))
         self.master.update()
         self.display_image_on_canvas(self.images[self.current_file])
         self.image_canvas.bind('<Configure>', self.on_resize)
@@ -54,16 +56,20 @@ class Application(tk.Frame):
         self.width = image.size[0]
         self.height = image.size[1]
         if self.width > self.image_canvas.winfo_width() or self.height > self.image_canvas.winfo_height():
-            width_ratio = float(self.image_canvas.winfo_width()) / float(self.width)
-            height_ratio = float(self.image_canvas.winfo_height()) / float(self.height)
+            width_ratio = float(
+                self.image_canvas.winfo_width()) / float(self.width)
+            height_ratio = float(
+                self.image_canvas.winfo_height()) / float(self.height)
             ratio = min(width_ratio, height_ratio)
             self.width = int(float(self.width) * float(ratio))
             self.height = int(float(self.height) * float(ratio))
 
         self.displayed_image = image.copy()
-        self.displayed_image.thumbnail((self.width, self.height), Image.ANTIALIAS)
+        self.displayed_image.thumbnail(
+            (self.width, self.height), Image.ANTIALIAS)
         self.displayed_image = ImageTk.PhotoImage(self.displayed_image)
-        self.canvas_image = self.image_canvas.create_image(0, 0, anchor=tk.NW, image=self.displayed_image)
+        self.canvas_image = self.image_canvas.create_image(
+            0, 0, anchor=tk.NW, image=self.displayed_image)
 
     def clear_canvas(self, widget):
         self.clear_selection_box(widget)
@@ -82,13 +88,17 @@ class Application(tk.Frame):
         if self.selection_box is None:
             return
         filename = os.path.basename(self.images[self.current_file].filename)
-        selected_box = self.get_selected_box(self.mouse_press_coord, self.mouse_move_coord, self.args.aspect_ratio)
-        displayed_image_size = (self.displayed_image.width(), self.displayed_image.height())
-        box = self.get_real_box(selected_box, self.images[self.current_file].size, displayed_image_size)
+        selected_box = self.get_selected_box(
+            self.mouse_press_coord, self.mouse_move_coord, self.args.aspect_ratio)
+        displayed_image_size = (
+            self.displayed_image.width(), self.displayed_image.height())
+        box = self.get_real_box(
+            selected_box, self.images[self.current_file].size, displayed_image_size)
         new_filename = self.find_available_name(self.args.output_dir, filename)
         image = self.images[self.current_file].copy().crop(box)
         if self.args.resize:
-            image = image.resize((self.args.resize[0], self.args.resize[1]), Image.LANCZOS)
+            image = image.resize(
+                (self.args.resize[0], self.args.resize[1]), Image.LANCZOS)
         image.save(os.path.join(self.args.output_dir, new_filename))
         self.clear_selection_box(self.image_canvas)
 
@@ -120,39 +130,47 @@ class Application(tk.Frame):
             self.selection_box = None
 
     def update_selection_box(self, widget):
-        selected_box = self.get_selected_box(self.mouse_press_coord, self.mouse_move_coord, self.args.aspect_ratio)
+        selected_box = self.get_selected_box(
+            self.mouse_press_coord, self.mouse_move_coord, self.args.aspect_ratio)
 
         if self.selection_box is None:
-            self.selection_box = widget.create_rectangle(selected_box, outline=self.args.selection_box_color)
+            self.selection_box = widget.create_rectangle(
+                selected_box, outline=self.args.selection_box_color)
         else:
             widget.coords(self.selection_box, selected_box)
 
     def update_window_title(self):
-        self.master.title(os.path.basename(self.images[self.current_file].filename))
+        self.master.title(os.path.basename(
+            self.images[self.current_file].filename))
 
     @staticmethod
     def get_real_box(selected_box, original_image_size, displayed_image_size):
         return (int(selected_box[0] * original_image_size[0]/displayed_image_size[0]),
-                int(selected_box[1] * original_image_size[1]/displayed_image_size[1]),
-                int(selected_box[2] * original_image_size[0]/displayed_image_size[0]),
+                int(selected_box[1] * original_image_size[1] /
+                    displayed_image_size[1]),
+                int(selected_box[2] * original_image_size[0] /
+                    displayed_image_size[0]),
                 int(selected_box[3] * original_image_size[1]/displayed_image_size[1]))
 
     @staticmethod
     def get_selected_box(mouse_press_coord, mouse_move_coord, aspect_ratio):
         selection_top_left_x = min(mouse_press_coord[0], mouse_move_coord[0])
         selection_top_left_y = min(mouse_press_coord[1], mouse_move_coord[1])
-        selection_bottom_right_x = max(mouse_press_coord[0], mouse_move_coord[0])
-        selection_bottom_right_y = max(mouse_press_coord[1], mouse_move_coord[1])
-        selection_box = (selection_top_left_x, selection_top_left_y, selection_bottom_right_x, selection_bottom_right_y)
+        selection_bottom_right_x = max(
+            mouse_press_coord[0], mouse_move_coord[0])
+        selection_bottom_right_y = max(
+            mouse_press_coord[1], mouse_move_coord[1])
+        selection_box = (selection_top_left_x, selection_top_left_y,
+                         selection_bottom_right_x, selection_bottom_right_y)
 
         if aspect_ratio is not None:
             aspect_ratio = float(aspect_ratio[0])/float(aspect_ratio[1])
             try:
-                selection_box = Application.get_selection_box_for_aspect_ratio(selection_box, aspect_ratio, 
+                selection_box = Application.get_selection_box_for_aspect_ratio(selection_box, aspect_ratio,
                                                                                mouse_press_coord, mouse_move_coord)
             except ZeroDivisionError:
                 pass
-        
+
         return tuple((lambda x: int(round(x)))(x) for x in selection_box)
 
     @staticmethod
@@ -161,7 +179,8 @@ class Application(tk.Frame):
 
         for filename in os.listdir(directory):
             filetype, _ = mimetypes.guess_type(filename)
-            if filetype is None or filetype.split("/")[0] != "image": continue
+            if filetype is None or filetype.split("/")[0] != "image":
+                continue
             try:
                 image = Image.open(os.path.join(directory, filename))
                 if preload_images:
@@ -206,6 +225,7 @@ def main():
     app = Application(args.parse_arguments(), master=root)
 
     app.mainloop()
+
 
 if __name__ == "__main__":
     main()
