@@ -5,6 +5,20 @@
 inbac is an **in**teractive **ba**tch **c**ropper made for quick cropping of images.  
 I made this program because cropping thousands of images with image viewers or image manipulation programs was too slow.
 
+## Requirements
+- [poetry](https://github.com/sdispater/poetry)
+- tkinter
+
+After installing above dependencies run `poetry install` in project directory to install remaining dependencies.
+
+## Examples
+
+`poetry run inbac /home/user/pictures/`  
+Opens images in /home/user/pictures/ and saves cropped images to /home/user/pictures/crops
+
+`poetry run inbac -a 1 1 -r 256 256 /home/user/pictures/ /home/user/crops/`  
+Opens images in /home/user/pictures/ in 1:1 ratio selection mode and saves images resized to 256x256px in /home/user/crops/ 
+
 ## Usage
 
 ```
