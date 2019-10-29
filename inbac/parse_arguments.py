@@ -6,7 +6,6 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description="""inbac - interactive batch cropper\n
-Usage:\n
 Left Mouse Button                 - select part of image\n
 Z                                 - save selection and go to the next picture\n
 X                                 - save selection and stay on the same picture\n
