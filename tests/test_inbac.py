@@ -2,6 +2,7 @@ import unittest
 import unittest.mock as mock
 import os
 from inbac.inbac import Application
+from PIL import Image
 
 class TestInbac(unittest.TestCase):
 
@@ -26,6 +27,53 @@ class TestInbac(unittest.TestCase):
         calls = [mock.call(os.path.join(directory, filename)), mock.call(os.path.join(directory, new_filename))]
         mock_path_isfile.assert_has_calls(calls)
         self.assertEqual(new_filename, returned_filename)
+
+    def test_selection_box_for_aspect_ratio_returns_box_with_aspect_ratio(self):
+        aspect_ratio = 16.0/9.0
+        mouse_press_coord = (0.0, 0.0)
+        mouse_move_coord = (15.0, 9.0)
+        selection_box = (0.0, 0.0, 15.0, 9.0)
+        expected_selection_box = (0.0, 0.0, 16.0, 9.0)
+        returned_selection_box = Application.get_selection_box_for_aspect_ratio(selection_box, aspect_ratio, 
+                                                                                mouse_press_coord, mouse_move_coord)
+        self.assertEqual(expected_selection_box, returned_selection_box)
+
+    def test_get_selected_box_returns_correct_selection_box_when_selecting_from_upper_left_to_bottom_right(self):
+        mouse_press_coord = (0.0, 0.0)
+        mouse_move_coord = (15.0, 9.0)
+        expected_selection_box = (0.0, 0.0, 15.0, 9.0)
+        returned_selection_box = Application.get_selected_box(mouse_press_coord, mouse_move_coord, None)
+        self.assertEqual(expected_selection_box, returned_selection_box)
+    
+    def test_get_selected_box_returns_correct_selection_box_when_selecting_from_bottom_right_to_upper_left(self):
+        mouse_press_coord = (15.0, 9.0)
+        mouse_move_coord = (0.0, 0.0)
+        expected_selection_box = (0.0, 0.0, 15.0, 9.0)
+        returned_selection_box = Application.get_selected_box(mouse_press_coord, mouse_move_coord, None)
+        self.assertEqual(expected_selection_box, returned_selection_box)
+
+    def test_get_real_box(self):
+        selected_box = (2, 2, 4, 4)
+        expected_real_box = (4, 4, 8, 8)
+        returned_real_box = Application.get_real_box(selected_box, (10, 10), (5, 5))
+        self.assertEqual(expected_real_box, returned_real_box)
+
+    @mock.patch('inbac.inbac.os.listdir')
+    def test_load_images_with_wrong_filetype(self, mock_listdir):
+        mock_listdir.return_value = ["test.txt", "test2"]
+        returned_images = Application.load_images("/home/test/", False)
+        self.assertListEqual([], returned_images)
+
+    @mock.patch('inbac.inbac.Image.open')
+    @mock.patch('inbac.inbac.os.listdir')
+    def test_load_images_with_image_file(self, mock_listdir, mock_image_open):
+        mock_listdir.return_value = ["test.txt", "test2.jpg"]
+        directory = "/home/test/"
+        returned_image = Image.new("RGB", (800, 600))
+        mock_image_open.return_value = returned_image
+        returned_images = Application.load_images(directory, False)
+        mock_image_open.assert_called_with(os.path.join(directory, mock_listdir.return_value[1]))
+        self.assertListEqual([returned_image], returned_images)
 
 def file_exist(x):
     if x == "/home/test/test.jpg":

@@ -135,7 +135,7 @@ class Application(tk.Frame):
                 int(selected_box[3] * original_image_size[1]/displayed_image_size[1]))
 
     @staticmethod
-    def get_selected_box(self, mouse_press_coord, mouse_move_coord, aspect_ratio):
+    def get_selected_box(mouse_press_coord, mouse_move_coord, aspect_ratio):
         selection_top_left_x = min(mouse_press_coord[0], mouse_move_coord[0])
         selection_top_left_y = min(mouse_press_coord[1], mouse_move_coord[1])
         selection_bottom_right_x = max(mouse_press_coord[0], mouse_move_coord[0])
@@ -144,11 +144,11 @@ class Application(tk.Frame):
         width = selection_bottom_right_x - selection_top_left_x
         height = selection_bottom_right_y - selection_top_left_y
 
-        if self.args.aspect_ratio is not None:
+        if aspect_ratio is not None:
             aspect_ratio = float(aspect_ratio[0])/float(aspect_ratio[1])
             try:
-                selection_box = self.get_selection_box_for_aspect_ratio(selection_box, aspect_ratio, 
-                                                                        mouse_press_coord, mouse_move_coord)
+                selection_box = Application.get_selection_box_for_aspect_ratio(selection_box, aspect_ratio, 
+                                                                               mouse_press_coord, mouse_move_coord)
             except ZeroDivisionError:
                 pass
         
