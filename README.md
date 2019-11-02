@@ -1,5 +1,7 @@
 # inbac
 
+![](resources/demo.gif)
+
 ## Description
 
 inbac is an **in**teractive **ba**tch **c**ropper made for quick cropping of images.  
