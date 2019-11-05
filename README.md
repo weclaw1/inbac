@@ -1,6 +1,6 @@
 # inbac
 
-![](resources/demo.gif)
+![](https://raw.githubusercontent.com/weclaw1/inbac/master/resources/demo.gif)
 
 ## Description
 
