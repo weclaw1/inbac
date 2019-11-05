@@ -81,12 +81,13 @@ class Application(tk.Frame):
         self.display_image_on_canvas(self.images[self.current_file])
 
     def save_next(self, event=None):
-        self.save()
-        self.next_image()
+        # check if image was selected then go to the next
+        if self.save():
+            self.next_image()
 
     def save(self, event=None):
         if self.selection_box is None:
-            return
+            return False
         filename = os.path.basename(self.images[self.current_file].filename)
         selected_box = self.get_selected_box(
             self.mouse_press_coord, self.mouse_move_coord, self.args.aspect_ratio)
@@ -101,6 +102,7 @@ class Application(tk.Frame):
                 (self.args.resize[0], self.args.resize[1]), Image.LANCZOS)
         image.save(os.path.join(self.args.output_dir, new_filename))
         self.clear_selection_box(self.image_canvas)
+        return True
 
     def next_image(self, event=None):
         if self.current_file + 1 >= len(self.images):
