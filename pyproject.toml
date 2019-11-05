@@ -1,8 +1,27 @@
 [tool.poetry]
 name = "inbac"
-version = "0.1.0"
-description = ""
+version = "1.0.0"
+description = "Interactive batch cropper made for quick cropping of images."
 authors = ["Robert Węcławski <r.weclawski@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/weclaw1/inbac"
+repository = "https://github.com/weclaw1/inbac"
+keywords = ["inbac", "batch", "image", "crop"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.6",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Multimedia :: Graphics :: Editors",
+    "Topic :: Utilities",
+]
+include = [
+    "LICENSE",
+]
 
 [tool.poetry.dependencies]
 python = "^3.6"
