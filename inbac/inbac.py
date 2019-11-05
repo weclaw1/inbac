@@ -100,7 +100,9 @@ class Application(tk.Frame):
         if self.args.resize:
             image = image.resize(
                 (self.args.resize[0], self.args.resize[1]), Image.LANCZOS)
-        image.save(os.path.join(self.args.output_dir, new_filename))
+        if self.args.image_format:
+            new_filename, _ = os.path.splitext(new_filename)
+        image.save(os.path.join(self.args.output_dir, new_filename),self.args.image_format,quality=self.args.image_quality)
         self.clear_selection_box(self.image_canvas)
         return True
 
