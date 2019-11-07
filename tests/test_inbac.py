@@ -70,20 +70,15 @@ class TestInbac(unittest.TestCase):
     @mock.patch('inbac.inbac.os.listdir')
     def test_load_images_with_wrong_filetype(self, mock_listdir):
         mock_listdir.return_value = ["test.txt", "test2"]
-        returned_images = Application.load_images("/home/test/", False)
+        returned_images = Application.load_image_list("/home/test/")
         self.assertListEqual([], returned_images)
 
-    @mock.patch('inbac.inbac.Image.open')
     @mock.patch('inbac.inbac.os.listdir')
-    def test_load_images_with_image_file(self, mock_listdir, mock_image_open):
+    def test_load_images(self, mock_listdir):
         mock_listdir.return_value = ["test.txt", "test2.jpg"]
         directory = "/home/test/"
-        returned_image = Image.new("RGB", (800, 600))
-        mock_image_open.return_value = returned_image
-        returned_images = Application.load_images(directory, False)
-        mock_image_open.assert_called_with(
-            os.path.join(directory, mock_listdir.return_value[1]))
-        self.assertListEqual([returned_image], returned_images)
+        returned_images = Application.load_image_list(directory)
+        self.assertListEqual(["test2.jpg"], returned_images)
 
 
 def file_exist(x):

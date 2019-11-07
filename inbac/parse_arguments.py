@@ -24,8 +24,6 @@ Left Arrow or Left Mouse Button   - go to previous picture\n"""
                         help="color of the selection box (default is black)", default="black")
     parser.add_argument("-w", "--window_size", type=int, nargs=2,
                         help="initial window size (default is 800x600)", default=[800, 600])
-    parser.add_argument("-p", "--preload_images",
-                        action="store_true", help="load all images to memory")
     parser.add_argument("-f", "--image_format", help="define the croped image format")
     parser.add_argument("-q", "--image_quality", type= int, help="define the croped image quality",default=100)
 

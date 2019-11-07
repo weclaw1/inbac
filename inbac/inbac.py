@@ -17,8 +17,7 @@ class Application(tk.Frame):
         self.args = args
         self.pack(fill=tk.BOTH, expand=tk.YES)
 
-        self.images = self.load_images(
-            self.args.input_dir, self.args.preload_images)
+        self.images = self.load_image_list(self.args.input_dir)
 
         if not os.path.exists(self.args.output_dir):
             os.makedirs(self.args.output_dir)
@@ -32,6 +31,7 @@ class Application(tk.Frame):
         self.image_canvas.pack(fill=tk.BOTH, expand=tk.YES)
 
         self.canvas_image = None
+        self.current_image = None
 
         self.master.bind('z', self.save_next)
         self.master.bind('x', self.save)
@@ -47,14 +47,14 @@ class Application(tk.Frame):
         self.master.geometry(
             str(self.args.window_size[0]) + "x" + str(self.args.window_size[1]))
         self.master.update()
-        self.display_image_on_canvas(self.images[self.current_file])
+        self.load_image(self.images[self.current_file])
         self.image_canvas.bind('<Configure>', self.on_resize)
-        self.update_window_title()
 
     def display_image_on_canvas(self, image):
         self.clear_canvas(self.image_canvas)
-        self.width = image.size[0]
-        self.height = image.size[1]
+        self.current_image = image
+        self.width = self.current_image.size[0]
+        self.height = self.current_image.size[1]
         if self.width > self.image_canvas.winfo_width() or self.height > self.image_canvas.winfo_height():
             width_ratio = float(
                 self.image_canvas.winfo_width()) / float(self.width)
@@ -64,7 +64,7 @@ class Application(tk.Frame):
             self.width = int(float(self.width) * float(ratio))
             self.height = int(float(self.height) * float(ratio))
 
-        self.displayed_image = image.copy()
+        self.displayed_image = self.current_image.copy()
         self.displayed_image.thumbnail(
             (self.width, self.height), Image.ANTIALIAS)
         self.displayed_image = ImageTk.PhotoImage(self.displayed_image)
@@ -78,7 +78,7 @@ class Application(tk.Frame):
             self.canvas_image = None
 
     def on_resize(self, event=None):
-        self.display_image_on_canvas(self.images[self.current_file])
+        self.display_image_on_canvas(self.current_image)
 
     def save_next(self, event=None):
         # check if image was selected then go to the next
@@ -88,21 +88,20 @@ class Application(tk.Frame):
     def save(self, event=None):
         if self.selection_box is None:
             return False
-        filename = os.path.basename(self.images[self.current_file].filename)
         selected_box = self.get_selected_box(
             self.mouse_press_coord, self.mouse_move_coord, self.args.aspect_ratio)
         displayed_image_size = (
             self.displayed_image.width(), self.displayed_image.height())
         box = self.get_real_box(
-            selected_box, self.images[self.current_file].size, displayed_image_size)
-        new_filename = self.find_available_name(self.args.output_dir, filename)
-        image = self.images[self.current_file].copy().crop(box)
+            selected_box, self.current_image.size, displayed_image_size)
+        new_filename = self.find_available_name(self.args.output_dir, self.images[self.current_file])
+        saved_image = self.current_image.copy().crop(box)
         if self.args.resize:
-            image = image.resize(
+            saved_image = saved_image.resize(
                 (self.args.resize[0], self.args.resize[1]), Image.LANCZOS)
         if self.args.image_format:
             new_filename, _ = os.path.splitext(new_filename)
-        image.save(os.path.join(self.args.output_dir, new_filename),self.args.image_format,quality=self.args.image_quality)
+        saved_image.save(os.path.join(self.args.output_dir, new_filename), self.args.image_format, quality=self.args.image_quality)
         self.clear_selection_box(self.image_canvas)
         return True
 
@@ -110,15 +109,27 @@ class Application(tk.Frame):
         if self.current_file + 1 >= len(self.images):
             return
         self.current_file += 1
-        self.display_image_on_canvas(self.images[self.current_file])
-        self.update_window_title()
+        try:
+            self.load_image(self.images[self.current_file])
+        except IOError:
+            self.next_image()
 
     def previous_image(self, event=None):
         if self.current_file - 1 < 0:
             return
         self.current_file -= 1
-        self.display_image_on_canvas(self.images[self.current_file])
-        self.update_window_title()
+        try:
+            self.load_image(self.images[self.current_file])
+        except IOError:
+            self.previous_image()
+    
+    def load_image(self, image_name):
+        if self.current_image is not None:
+            self.current_image.close()
+            self.current_image = None
+        image = Image.open(os.path.join(self.args.input_dir, image_name))
+        self.display_image_on_canvas(image)
+        self.master.title(image_name)
 
     def on_mouse_down(self, event):
         self.mouse_press_coord = (event.x, event.y)
@@ -142,10 +153,6 @@ class Application(tk.Frame):
                 selected_box, outline=self.args.selection_box_color)
         else:
             widget.coords(self.selection_box, selected_box)
-
-    def update_window_title(self):
-        self.master.title(os.path.basename(
-            self.images[self.current_file].filename))
 
     @staticmethod
     def get_real_box(selected_box, original_image_size, displayed_image_size):
@@ -178,20 +185,14 @@ class Application(tk.Frame):
         return tuple((lambda x: int(round(x)))(x) for x in selection_box)
 
     @staticmethod
-    def load_images(directory, preload_images):
+    def load_image_list(directory):
         images = []
 
         for filename in os.listdir(directory):
             filetype, _ = mimetypes.guess_type(filename)
             if filetype is None or filetype.split("/")[0] != "image":
                 continue
-            try:
-                image = Image.open(os.path.join(directory, filename))
-                if preload_images:
-                    image.load()
-                images.append(image)
-            except IOError:
-                pass
+            images.append(filename)
 
         return images
 
