@@ -25,7 +25,8 @@ Opens images in /home/user/pictures/ in 1:1 ratio selection mode and saves image
 
 ```
 usage: inbac [-h] [-a ASPECT_RATIO ASPECT_RATIO] [-r RESIZE RESIZE]
-             [-s SELECTION_BOX_COLOR] [-w WINDOW_SIZE WINDOW_SIZE] [-p]
+             [-s SELECTION_BOX_COLOR] [-w WINDOW_SIZE WINDOW_SIZE]
+             [-f IMAGE_FORMAT] [-q IMAGE_QUALITY]
              [input_dir] [output_dir]
 
 inbac - interactive batch cropper
@@ -57,5 +58,8 @@ optional arguments:
                         color of the selection box (default is black)
   -w WINDOW_SIZE WINDOW_SIZE, --window_size WINDOW_SIZE WINDOW_SIZE
                         initial window size (default is 800x600)
-  -p, --preload_images  load all images to memory
+  -f IMAGE_FORMAT, --image_format IMAGE_FORMAT
+                        define the croped image format
+  -q IMAGE_QUALITY, --image_quality IMAGE_QUALITY
+                        define the croped image quality
  ```

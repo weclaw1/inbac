@@ -2,8 +2,6 @@ import os
 import unittest
 import unittest.mock as mock
 
-from PIL import Image
-
 from inbac.inbac import Application
 
 
@@ -84,8 +82,6 @@ class TestInbac(unittest.TestCase):
 def file_exist(x):
     if x == "/home/test/test.jpg":
         return True
-    elif x == "/home/test/test2.jpg":
-        return False
     return False
 
 

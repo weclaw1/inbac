@@ -1,8 +1,6 @@
 import itertools
 import mimetypes
 import os
-import subprocess
-import sys
 import tkinter as tk
 
 from PIL import Image, ImageTk
@@ -53,20 +51,20 @@ class Application(tk.Frame):
     def display_image_on_canvas(self, image):
         self.clear_canvas(self.image_canvas)
         self.current_image = image
-        self.width = self.current_image.size[0]
-        self.height = self.current_image.size[1]
-        if self.width > self.image_canvas.winfo_width() or self.height > self.image_canvas.winfo_height():
+        width = self.current_image.size[0]
+        height = self.current_image.size[1]
+        if width > self.image_canvas.winfo_width() or height > self.image_canvas.winfo_height():
             width_ratio = float(
-                self.image_canvas.winfo_width()) / float(self.width)
+                self.image_canvas.winfo_width()) / float(width)
             height_ratio = float(
-                self.image_canvas.winfo_height()) / float(self.height)
+                self.image_canvas.winfo_height()) / float(height)
             ratio = min(width_ratio, height_ratio)
-            self.width = int(float(self.width) * float(ratio))
-            self.height = int(float(self.height) * float(ratio))
+            width = int(float(width) * float(ratio))
+            height = int(float(height) * float(ratio))
 
         self.displayed_image = self.current_image.copy()
         self.displayed_image.thumbnail(
-            (self.width, self.height), Image.ANTIALIAS)
+            (width, height), Image.ANTIALIAS)
         self.displayed_image = ImageTk.PhotoImage(self.displayed_image)
         self.canvas_image = self.image_canvas.create_image(
             0, 0, anchor=tk.NW, image=self.displayed_image)
@@ -94,14 +92,16 @@ class Application(tk.Frame):
             self.displayed_image.width(), self.displayed_image.height())
         box = self.get_real_box(
             selected_box, self.current_image.size, displayed_image_size)
-        new_filename = self.find_available_name(self.args.output_dir, self.images[self.current_file])
+        new_filename = self.find_available_name(
+            self.args.output_dir, self.images[self.current_file])
         saved_image = self.current_image.copy().crop(box)
         if self.args.resize:
             saved_image = saved_image.resize(
                 (self.args.resize[0], self.args.resize[1]), Image.LANCZOS)
         if self.args.image_format:
             new_filename, _ = os.path.splitext(new_filename)
-        saved_image.save(os.path.join(self.args.output_dir, new_filename), self.args.image_format, quality=self.args.image_quality)
+        saved_image.save(os.path.join(self.args.output_dir, new_filename),
+                         self.args.image_format, quality=self.args.image_quality)
         self.clear_selection_box(self.image_canvas)
         return True
 
@@ -122,7 +122,7 @@ class Application(tk.Frame):
             self.load_image(self.images[self.current_file])
         except IOError:
             self.previous_image()
-    
+
     def load_image(self, image_name):
         if self.current_image is not None:
             self.current_image.close()
