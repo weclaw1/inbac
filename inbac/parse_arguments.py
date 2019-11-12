@@ -13,7 +13,7 @@ Right Arrow or Right Mouse Button - go to next picture\n
 Left Arrow or Left Mouse Button   - go to previous picture\n"""
     )
     parser.add_argument("input_dir", nargs="?",
-                        help="input directory (defaults to current working directory)", default=os.getcwd())
+                        help="input directory (defaults to current working directory)", default=None)
     parser.add_argument("output_dir", nargs="?",
                         help="output directory (defaults to folder crops in input directory)", default=argparse.SUPPRESS)
     parser.add_argument("-a", "--aspect_ratio", type=int, nargs=2,
@@ -30,7 +30,5 @@ Left Arrow or Left Mouse Button   - go to previous picture\n"""
                         help="define the croped image quality", default=100)
 
     args = parser.parse_args()
-    args.output_dir = getattr(
-        args, "output_dir", os.path.join(args.input_dir, "crops"))
 
     return args

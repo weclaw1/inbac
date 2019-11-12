@@ -3,6 +3,8 @@ import mimetypes
 import os
 import tkinter as tk
 
+from tkinter import filedialog
+
 from PIL import Image, ImageTk
 
 import inbac.parse_arguments as args
@@ -15,6 +17,17 @@ class Application(tk.Frame):
         self.args = args
         self.pack(fill=tk.BOTH, expand=tk.YES)
 
+        self.image_canvas = tk.Canvas(self, highlightthickness=0)
+        self.image_canvas.pack(fill=tk.BOTH, expand=tk.YES)
+
+        self.master.geometry(
+            str(self.args.window_size[0]) + "x" + str(self.args.window_size[1]))
+        self.master.update()
+
+        if args.input_dir is None:
+            args.input_dir = filedialog.askdirectory(parent = master)
+        args.output_dir = getattr(args, "output_dir", os.path.join(args.input_dir, "crops"))
+
         self.images = self.load_image_list(self.args.input_dir)
 
         if not os.path.exists(self.args.output_dir):
@@ -24,9 +37,6 @@ class Application(tk.Frame):
 
         self.mouse_press_coord = (0, 0)
         self.mouse_move_coord = (0, 0)
-
-        self.image_canvas = tk.Canvas(self, highlightthickness=0)
-        self.image_canvas.pack(fill=tk.BOTH, expand=tk.YES)
 
         self.canvas_image = None
         self.current_image = None
@@ -42,9 +52,6 @@ class Application(tk.Frame):
 
         self.current_file = 0
 
-        self.master.geometry(
-            str(self.args.window_size[0]) + "x" + str(self.args.window_size[1]))
-        self.master.update()
         self.load_image(self.images[self.current_file])
         self.image_canvas.bind('<Configure>', self.on_resize)
 
