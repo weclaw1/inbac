@@ -41,6 +41,9 @@ class Application(tk.Frame):
         self.canvas_image = None
         self.current_image = None
 
+        self.enabled_selection_mode = False
+        self.box_selected = False
+
         self.master.bind('z', self.save_next)
         self.master.bind('x', self.save)
         self.master.bind('<Left>', self.previous_image)
@@ -49,6 +52,12 @@ class Application(tk.Frame):
         self.master.bind('<ButtonPress-2>', self.previous_image)
         self.master.bind('<ButtonPress-1>', self.on_mouse_down)
         self.master.bind('<B1-Motion>', self.on_mouse_drag)
+        self.master.bind('<ButtonRelease-1>', self.on_mouse_up)
+
+        self.master.bind('<KeyPress-Shift_L>', self.enable_selection_mode)
+        self.master.bind('<KeyPress-Control_L>', self.enable_selection_mode)
+        self.master.bind('<KeyRelease-Shift_L>', self.disable_selection_mode)
+        self.master.bind('<KeyRelease-Control_L>', self.disable_selection_mode)
 
         self.current_file = 0
 
@@ -76,6 +85,12 @@ class Application(tk.Frame):
         self.canvas_image = self.image_canvas.create_image(
             0, 0, anchor=tk.NW, image=self.displayed_image)
 
+    def enable_selection_mode(self, event=None):
+        self.enabled_selection_mode = True
+
+    def disable_selection_mode(self, event=None):
+        self.enabled_selection_mode = False
+
     def clear_canvas(self, widget):
         self.clear_selection_box(widget)
         if self.canvas_image is not None:
@@ -93,8 +108,7 @@ class Application(tk.Frame):
     def save(self, event=None):
         if self.selection_box is None:
             return False
-        selected_box = self.get_selected_box(
-            self.mouse_press_coord, self.mouse_move_coord, self.args.aspect_ratio)
+        selected_box = self.image_canvas.coords(self.selection_box)
         displayed_image_size = (
             self.displayed_image.width(), self.displayed_image.height())
         box = self.get_real_box(
@@ -140,11 +154,27 @@ class Application(tk.Frame):
 
     def on_mouse_down(self, event):
         self.mouse_press_coord = (event.x, event.y)
-        self.clear_selection_box(event.widget)
+        self.mouse_move_coord = (event.x, event.y)
+        if self.enabled_selection_mode and self.selection_box is not None:
+            selected_box = event.widget.coords(self.selection_box)
+            self.box_selected = self.coordinates_in_selection_box(self.mouse_press_coord, selected_box)
+        else:
+            self.clear_selection_box(event.widget)
 
     def on_mouse_drag(self, event):
+        if self.enabled_selection_mode and not self.box_selected:
+            return
+        prev_mouse_move_coord = self.mouse_move_coord
         self.mouse_move_coord = (event.x, event.y)
-        self.update_selection_box(event.widget)
+        if self.box_selected:
+            x_delta = self.mouse_move_coord[0] - prev_mouse_move_coord[0]
+            y_delta = self.mouse_move_coord[1] - prev_mouse_move_coord[1]
+            event.widget.move(self.selection_box, x_delta, y_delta)
+        else:
+            self.update_selection_box(event.widget)
+
+    def on_mouse_up(self, event):
+        self.box_selected = False
 
     def clear_selection_box(self, widget):
         if self.selection_box is not None:
@@ -230,6 +260,14 @@ class Application(tk.Frame):
         for num in itertools.count(2):
             if not os.path.isfile(os.path.join(directory, name + str(num) + extension)):
                 return name + str(num) + extension
+
+    @staticmethod
+    def coordinates_in_selection_box(coordinates, selection_box):
+        if (coordinates[0] > selection_box[0] and coordinates[0] < selection_box[2] 
+        and coordinates[1] > selection_box[1] and coordinates[1] < selection_box[3]):
+            return True
+        else:
+            return False
 
 
 def main():
