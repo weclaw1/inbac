@@ -1,68 +1,30 @@
 import itertools
-import mimetypes
-import os
 import tkinter as tk
+import os
 
 from tkinter import filedialog
 
 from PIL import Image, ImageTk
 
 import inbac.parse_arguments as args
+import inbac.model as model
+import inbac.view as view
+import inbac.controller as controller
 
-
-class Application(tk.Frame):
-    def __init__(self, args, master=None):
-        super().__init__(master)
-        self.master = master
-        self.args = args
-        self.pack(fill=tk.BOTH, expand=tk.YES)
-
-        self.image_canvas = tk.Canvas(self, highlightthickness=0)
-        self.image_canvas.pack(fill=tk.BOTH, expand=tk.YES)
-
-        self.master.geometry(
-            str(self.args.window_size[0]) + "x" + str(self.args.window_size[1]))
-        self.master.update()
+class Application():
+    def __init__(self, args, master):
+        self.model = model.Model(args)
+        self.view = view.View(master, args.window_size)
 
         if args.input_dir is None:
             args.input_dir = filedialog.askdirectory(parent = master)
         args.output_dir = getattr(args, "output_dir", os.path.join(args.input_dir, "crops"))
 
-        self.images = self.load_image_list(self.args.input_dir)
+        if not os.path.exists(args.output_dir):
+            os.makedirs(args.output_dir)
 
-        if not os.path.exists(self.args.output_dir):
-            os.makedirs(self.args.output_dir)
-
-        self.selection_box = None
-
-        self.mouse_press_coord = (0, 0)
-        self.mouse_move_coord = (0, 0)
-
-        self.canvas_image = None
-        self.current_image = None
-
-        self.enabled_selection_mode = False
-        self.box_selected = False
-
-        self.master.bind('z', self.save_next)
-        self.master.bind('x', self.save)
-        self.master.bind('<Left>', self.previous_image)
-        self.master.bind('<Right>', self.next_image)
-        self.master.bind('<ButtonPress-3>', self.next_image)
-        self.master.bind('<ButtonPress-2>', self.previous_image)
-        self.master.bind('<ButtonPress-1>', self.on_mouse_down)
-        self.master.bind('<B1-Motion>', self.on_mouse_drag)
-        self.master.bind('<ButtonRelease-1>', self.on_mouse_up)
-
-        self.master.bind('<KeyPress-Shift_L>', self.enable_selection_mode)
-        self.master.bind('<KeyPress-Control_L>', self.enable_selection_mode)
-        self.master.bind('<KeyRelease-Shift_L>', self.disable_selection_mode)
-        self.master.bind('<KeyRelease-Control_L>', self.disable_selection_mode)
-
-        self.current_file = 0
-
-        self.load_image(self.images[self.current_file])
-        self.image_canvas.bind('<Configure>', self.on_resize)
+        self.controller = controller.Controller(self.model, self.view)
+        self.view.controller = self.controller
 
     def display_image_on_canvas(self, image):
         self.clear_canvas(self.image_canvas)
@@ -144,14 +106,6 @@ class Application(tk.Frame):
         except IOError:
             self.previous_image()
 
-    def load_image(self, image_name):
-        if self.current_image is not None:
-            self.current_image.close()
-            self.current_image = None
-        image = Image.open(os.path.join(self.args.input_dir, image_name))
-        self.display_image_on_canvas(image)
-        self.master.title(image_name)
-
     def on_mouse_down(self, event):
         self.mouse_press_coord = (event.x, event.y)
         self.mouse_move_coord = (event.x, event.y)
@@ -222,18 +176,6 @@ class Application(tk.Frame):
         return tuple((lambda x: int(round(x)))(x) for x in selection_box)
 
     @staticmethod
-    def load_image_list(directory):
-        images = []
-
-        for filename in os.listdir(directory):
-            filetype, _ = mimetypes.guess_type(filename)
-            if filetype is None or filetype.split("/")[0] != "image":
-                continue
-            images.append(filename)
-
-        return images
-
-    @staticmethod
     def get_selection_box_for_aspect_ratio(selection_box, aspect_ratio, mouse_press_coord, mouse_move_coord):
         selection_box = list(selection_box)
         width = selection_box[2] - selection_box[0]
@@ -274,7 +216,7 @@ def main():
     root = tk.Tk()
     app = Application(args.parse_arguments(), master=root)
 
-    app.mainloop()
+    app.master.mainloop()
 
 
 if __name__ == "__main__":
