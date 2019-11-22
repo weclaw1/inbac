@@ -9,8 +9,11 @@ class Controller():
         self.model = model
         self.view = view
 
-        self.model.images = self.load_image_list(self.model.args.input_dir)
-        self.load_image(self.model.images[self.model.current_file])
+        if self.model.args.input_dir:
+            self.model.images = self.load_image_list(self.model.args.input_dir)
+
+        if self.model.images:
+            self.load_image(self.model.images[self.model.current_file])
 
     def load_image(self, image_name):
         if self.model.current_image is not None:
