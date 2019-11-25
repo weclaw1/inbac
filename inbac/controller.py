@@ -1,0 +1,210 @@
+import itertools
+import mimetypes
+import os
+
+from PIL import Image, ImageTk
+
+class Controller():
+    def __init__(self, model, view):
+        self.model = model
+        self.view = view
+
+        if self.model.args.input_dir:
+            self.model.images = self.load_image_list(self.model.args.input_dir)
+
+        if self.model.images:
+            self.load_image(self.model.images[self.model.current_file])
+
+    def load_image(self, image_name):
+        if self.model.current_image is not None:
+            self.model.current_image.close()
+            self.model.current_image = None
+        image = Image.open(os.path.join(self.model.args.input_dir, image_name))
+        self.display_image_on_canvas(image)
+        self.view.set_title(image_name)
+
+    def display_image_on_canvas(self, image):
+        self.clear_canvas()
+        self.model.current_image = image
+        self.model.canvas_image_dimensions = self.calculate_canvas_image_dimensions(self.model.current_image.size[0],
+                                                                                    self.model.current_image.size[1],
+                                                                                    self.view.image_canvas.winfo_width(), 
+                                                                                    self.view.image_canvas.winfo_height())
+        displayed_image = self.model.current_image.copy()
+        displayed_image.thumbnail(self.model.canvas_image_dimensions, Image.ANTIALIAS)
+        self.model.displayed_image = ImageTk.PhotoImage(displayed_image)
+        self.model.canvas_image = self.view.display_image(self.model.displayed_image)
+
+    def clear_canvas(self):
+        self.clear_selection_box()
+        if self.model.canvas_image is not None:
+            self.view.remove_from_canvas(self.model.canvas_image)
+            self.model.canvas_image = None
+
+    def clear_selection_box(self):
+        if self.model.selection_box is not None:
+            self.view.remove_from_canvas(self.model.selection_box)
+            self.model.selection_box = None
+
+    def update_selection_box(self):
+        selected_box = self.get_selected_box(
+            self.model.press_coord, self.model.move_coord, self.model.args.aspect_ratio)
+
+        if self.model.selection_box is None:
+            self.model.selection_box = self.view.create_rectangle(selected_box, self.model.args.selection_box_color)
+        else:
+            self.view.change_canvas_object_coords(self.model.selection_box, selected_box)
+
+    def stop_selection(self):
+        self.model.box_selected = False
+
+    def start_selection(self, press_coord):
+        self.model.press_coord = press_coord
+        self.model.move_coord = press_coord
+        if self.model.enabled_selection_mode and self.model.selection_box is not None:
+            selected_box = self.view.get_canvas_object_coords(self.model.selection_box)
+            self.model.box_selected = self.coordinates_in_selection_box(self.model.press_coord, selected_box)
+        else:
+            self.clear_selection_box()
+
+    def move_selection(self, move_coord):
+        if self.model.enabled_selection_mode and not self.model.box_selected:
+            return
+        prev_move_coord = self.model.move_coord
+        self.model.move_coord = move_coord
+        if self.model.box_selected:
+            x_delta = self.model.move_coord[0] - prev_move_coord[0]
+            y_delta = self.model.move_coord[1] - prev_move_coord[1]
+            self.view.move_canvas_object_by_offset(self.model.selection_box, x_delta, y_delta)
+        else:
+            self.update_selection_box()
+
+    def next_image(self):
+        if self.model.current_file + 1 >= len(self.model.images):
+            return
+        self.model.current_file += 1
+        try:
+            self.load_image(self.model.images[self.model.current_file])
+        except IOError:
+            self.next_image()
+
+    def previous_image(self):
+        if self.model.current_file - 1 < 0:
+            return
+        self.model.current_file -= 1
+        try:
+            self.load_image(self.model.images[self.model.current_file])
+        except IOError:
+            self.previous_image()
+
+    def save_next(self):
+        if self.save():
+            self.next_image()
+
+    def save(self):
+        if self.model.selection_box is None:
+            return False
+        selected_box = self.view.get_canvas_object_coords(self.model.selection_box)
+        box = self.get_real_box(
+            selected_box, self.model.current_image.size, self.model.canvas_image_dimensions)
+        new_filename = self.find_available_name(
+            self.model.args.output_dir, self.model.images[self.model.current_file])
+        saved_image = self.model.current_image.copy().crop(box)
+        if self.model.args.resize:
+            saved_image = saved_image.resize(
+                (self.model.args.resize[0], self.model.args.resize[1]), Image.LANCZOS)
+        if self.model.args.image_format:
+            new_filename, _ = os.path.splitext(new_filename)
+        saved_image.save(os.path.join(self.model.args.output_dir, new_filename),
+                         self.model.args.image_format, quality=self.model.args.image_quality)
+        self.clear_selection_box()
+        return True
+
+    @staticmethod
+    def calculate_canvas_image_dimensions(image_width, image_height, canvas_width, canvas_height):
+        if image_width > canvas_width or image_height > canvas_height:
+            width_ratio = float(canvas_width) / float(image_width)
+            height_ratio = float(canvas_height) / float(image_height)
+            ratio = min(width_ratio, height_ratio)
+            new_image_width = int(float(image_width) * float(ratio))
+            new_image_height = int(float(image_height) * float(ratio))
+            return (new_image_width, new_image_height)
+        return (image_width, image_height)
+
+    @staticmethod
+    def load_image_list(directory):
+        images = []
+
+        for filename in os.listdir(directory):
+            filetype, _ = mimetypes.guess_type(filename)
+            if filetype is None or filetype.split("/")[0] != "image":
+                continue
+            images.append(filename)
+
+        return images
+ 
+    @staticmethod
+    def coordinates_in_selection_box(coordinates, selection_box):
+        if (coordinates[0] > selection_box[0] and coordinates[0] < selection_box[2] 
+        and coordinates[1] > selection_box[1] and coordinates[1] < selection_box[3]):
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def find_available_name(directory, filename):
+        name, extension = os.path.splitext(filename)
+        if not os.path.isfile(os.path.join(directory, filename)):
+            return filename
+        for num in itertools.count(2):
+            if not os.path.isfile(os.path.join(directory, name + str(num) + extension)):
+                return name + str(num) + extension
+
+    @staticmethod
+    def get_selection_box_for_aspect_ratio(selection_box, aspect_ratio, mouse_press_coord, mouse_move_coord):
+        selection_box = list(selection_box)
+        width = selection_box[2] - selection_box[0]
+        height = selection_box[3] - selection_box[1]
+        if float(width)/float(height) > aspect_ratio:
+            height = width / aspect_ratio
+            if mouse_move_coord[1] > mouse_press_coord[1]:
+                selection_box[3] = selection_box[1] + height
+            else:
+                selection_box[1] = selection_box[3] - height
+        else:
+            width = height * aspect_ratio
+            if mouse_move_coord[0] > mouse_press_coord[0]:
+                selection_box[2] = selection_box[0] + width
+            else:
+                selection_box[0] = selection_box[2] - width
+        return tuple(selection_box)
+
+    @staticmethod
+    def get_selected_box(mouse_press_coord, mouse_move_coord, aspect_ratio):
+        selection_top_left_x = min(mouse_press_coord[0], mouse_move_coord[0])
+        selection_top_left_y = min(mouse_press_coord[1], mouse_move_coord[1])
+        selection_bottom_right_x = max(
+            mouse_press_coord[0], mouse_move_coord[0])
+        selection_bottom_right_y = max(
+            mouse_press_coord[1], mouse_move_coord[1])
+        selection_box = (selection_top_left_x, selection_top_left_y,
+                         selection_bottom_right_x, selection_bottom_right_y)
+
+        if aspect_ratio is not None:
+            aspect_ratio = float(aspect_ratio[0])/float(aspect_ratio[1])
+            try:
+                selection_box = Controller.get_selection_box_for_aspect_ratio(selection_box, aspect_ratio,
+                                                                               mouse_press_coord, mouse_move_coord)
+            except ZeroDivisionError:
+                pass
+
+        return tuple((lambda x: int(round(x)))(x) for x in selection_box)
+
+    @staticmethod
+    def get_real_box(selected_box, original_image_size, displayed_image_size):
+        return (int(selected_box[0] * original_image_size[0]/displayed_image_size[0]),
+                int(selected_box[1] * original_image_size[1] /
+                    displayed_image_size[1]),
+                int(selected_box[2] * original_image_size[0] /
+                    displayed_image_size[0]),
+                int(selected_box[3] * original_image_size[1]/displayed_image_size[1]))
