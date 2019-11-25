@@ -32,8 +32,8 @@ class Controller():
                                                                                     self.view.image_canvas.winfo_height())
         displayed_image = self.model.current_image.copy()
         displayed_image.thumbnail(self.model.canvas_image_dimensions, Image.ANTIALIAS)
-        displayed_image = ImageTk.PhotoImage(displayed_image)
-        self.model.canvas_image = self.view.display_image(displayed_image)
+        self.model.displayed_image = ImageTk.PhotoImage(displayed_image)
+        self.model.canvas_image = self.view.display_image(self.model.displayed_image)
 
     def clear_canvas(self):
         self.clear_selection_box()
@@ -106,7 +106,7 @@ class Controller():
             return False
         selected_box = self.view.get_canvas_object_coords(self.model.selection_box)
         box = self.get_real_box(
-            selected_box, self.model.current_image.size, self.model.displayed_image_dimensions)
+            selected_box, self.model.current_image.size, self.model.canvas_image_dimensions)
         new_filename = self.find_available_name(
             self.model.args.output_dir, self.model.images[self.model.current_file])
         saved_image = self.model.current_image.copy().crop(box)

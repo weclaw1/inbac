@@ -3,7 +3,7 @@ import tkinter as tk
 class View():
     def __init__(self, master, initial_window_size):
         self.master = master
-        self.frame = tk.Frame(master, relief=tk.RIDGE, borderwidth=2)
+        self.frame = tk.Frame(self.master, relief=tk.RIDGE, borderwidth=2)
         self.frame.pack(fill=tk.BOTH, expand=tk.YES)
         self.image_canvas = tk.Canvas(self.frame, highlightthickness=0)
         self.image_canvas.pack(fill=tk.BOTH, expand=tk.YES)
@@ -14,20 +14,20 @@ class View():
         self._bind_events()
 
     def _bind_events(self):
-        self.frame.bind('z', self.save_next)
-        self.frame.bind('x', self.save)
-        self.frame.bind('<Left>', self.previous_image)
-        self.frame.bind('<Right>', self.next_image)
-        self.frame.bind('<ButtonPress-3>', self.next_image)
-        self.frame.bind('<ButtonPress-2>', self.previous_image)
+        self.master.bind('z', self.save_next)
+        self.master.bind('x', self.save)
+        self.master.bind('<Left>', self.previous_image)
+        self.master.bind('<Right>', self.next_image)
+        self.master.bind('<ButtonPress-3>', self.next_image)
+        self.master.bind('<ButtonPress-2>', self.previous_image)
         self.image_canvas.bind('<ButtonPress-1>', self.on_mouse_down)
         self.image_canvas.bind('<B1-Motion>', self.on_mouse_drag)
         self.image_canvas.bind('<ButtonRelease-1>', self.on_mouse_up)
 
-        self.frame.bind('<KeyPress-Shift_L>', self.enable_selection_mode)
-        self.frame.bind('<KeyPress-Control_L>', self.enable_selection_mode)
-        self.frame.bind('<KeyRelease-Shift_L>', self.disable_selection_mode)
-        self.frame.bind('<KeyRelease-Control_L>', self.disable_selection_mode)
+        self.master.bind('<KeyPress-Shift_L>', self.enable_selection_mode)
+        self.master.bind('<KeyPress-Control_L>', self.enable_selection_mode)
+        self.master.bind('<KeyRelease-Shift_L>', self.disable_selection_mode)
+        self.master.bind('<KeyRelease-Control_L>', self.disable_selection_mode)
 
         self.image_canvas.bind('<Configure>', self.on_resize)
 
@@ -38,7 +38,7 @@ class View():
         self.image_canvas.delete(obj)
 
     def create_rectangle(self, box, outline_color):
-        self.image_canvas.create_rectangle(box, outline=outline_color)
+        return self.image_canvas.create_rectangle(box, outline=outline_color)
 
     def change_canvas_object_coords(self, obj, coords):
         self.image_canvas.coords(obj, coords)
@@ -47,7 +47,7 @@ class View():
         return self.image_canvas.coords(obj)
 
     def move_canvas_object_by_offset(self, obj, offset_x, offset_y):
-        self.image_canvas.move(object, offset_x, offset_y)
+        self.image_canvas.move(obj, offset_x, offset_y)
 
     def enable_selection_mode(self, event=None):
         self.controller.model.enabled_selection_mode = True
