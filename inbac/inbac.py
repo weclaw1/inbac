@@ -1,19 +1,20 @@
 import tkinter as tk
 import os
 
-from tkinter import filedialog
+from tkinter import filedialog, Tk
+from argparse import Namespace
 
 from PIL import Image, ImageTk
 
 import inbac.parse_arguments as args
-import inbac.model as model
-import inbac.view as view
-import inbac.controller as controller
+from inbac.model import Model
+from inbac.view import View
+from inbac.controller import Controller
 
 class Application():
-    def __init__(self, args, master):
-        self.model = model.Model(args)
-        self.view = view.View(master, args.window_size)
+    def __init__(self, args: Namespace, master: Tk):
+        self.model: Model = Model(args)
+        self.view: View = View(master, args.window_size)
 
         if args.input_dir is None:
             args.input_dir = filedialog.askdirectory(parent = master)
@@ -22,7 +23,7 @@ class Application():
         if not os.path.exists(args.output_dir):
             os.makedirs(args.output_dir)
 
-        self.controller = controller.Controller(self.model, self.view)
+        self.controller: Controller = Controller(self.model, self.view)
         self.view.controller = self.controller
 
     def run(self):

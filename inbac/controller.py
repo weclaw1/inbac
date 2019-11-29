@@ -5,7 +5,7 @@ import os
 from typing import Optional, List, Tuple, Any
 
 from inbac.model import Model
-from  inbac.view import View
+from inbac.view import View
 
 from PIL import Image, ImageTk
 
@@ -189,7 +189,7 @@ class Controller():
 
     @staticmethod
     def get_selected_box(mouse_press_coord: Tuple[int, int], mouse_move_coord: Tuple[int, int], 
-                         aspect_ratio: Optional[int, int]) -> Tuple[int, int, int, int]:
+                         aspect_ratio: Optional[Tuple[int, int]]) -> Tuple[int, int, int, int]:
         selection_top_left_x: int = min(mouse_press_coord[0], mouse_move_coord[0])
         selection_top_left_y: int = min(mouse_press_coord[1], mouse_move_coord[1])
         selection_bottom_right_x: int = max(

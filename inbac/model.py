@@ -1,6 +1,7 @@
 from typing import Optional, List, Tuple, Any
 from argparse import Namespace
 from PIL import Image
+from PIL.ImageTk import PhotoImage
 
 class Model():
     def __init__(self, args):
@@ -9,6 +10,7 @@ class Model():
         self.selection_box: Optional[Any] = None
         self.press_coord: Tuple[int, int] = (0, 0)
         self.move_coord: Tuple[int, int] = (0, 0)
+        self.displayed_image: Optional[PhotoImage] = None
         self.canvas_image: Optional[Any] = None
         self.canvas_image_dimensions: Tuple[int, int] = (0, 0)
         self.current_image: Optional[Image] = None
