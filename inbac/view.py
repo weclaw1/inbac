@@ -1,11 +1,14 @@
 import tkinter as tk
+from tkinter import Tk, Frame, Canvas, Event
+from typing import Optional, List, Tuple, Any
+from PIL.ImageTk import PhotoImage
 
 class View():
-    def __init__(self, master, initial_window_size):
-        self.master = master
-        self.frame = tk.Frame(self.master, relief=tk.RIDGE, borderwidth=2)
+    def __init__(self, master: Tk, initial_window_size: Tuple[int, int]):
+        self.master: Tk = master
+        self.frame: Frame = tk.Frame(self.master, relief=tk.RIDGE, borderwidth=2)
         self.frame.pack(fill=tk.BOTH, expand=tk.YES)
-        self.image_canvas = tk.Canvas(self.frame, highlightthickness=0)
+        self.image_canvas: Canvas = Canvas(self.frame, highlightthickness=0)
         self.image_canvas.pack(fill=tk.BOTH, expand=tk.YES)
         self.master.geometry(str(initial_window_size[0]) + "x" + str(initial_window_size[1]))
         self.master.update()
@@ -31,53 +34,53 @@ class View():
 
         self.image_canvas.bind('<Configure>', self.on_resize)
 
-    def display_image(self, image):
+    def display_image(self, image: PhotoImage) -> Any:
         return self.image_canvas.create_image(0, 0, anchor=tk.NW, image=image)
 
-    def remove_from_canvas(self, obj):
+    def remove_from_canvas(self, obj: Any):
         self.image_canvas.delete(obj)
 
-    def create_rectangle(self, box, outline_color):
+    def create_rectangle(self, box: Tuple[int, int, int, int], outline_color: str) -> Any:
         return self.image_canvas.create_rectangle(box, outline=outline_color)
 
-    def change_canvas_object_coords(self, obj, coords):
+    def change_canvas_object_coords(self, obj: Any, coords: Tuple[int, int]):
         self.image_canvas.coords(obj, coords)
 
-    def get_canvas_object_coords(self, obj):
+    def get_canvas_object_coords(self, obj: Any) -> Any:
         return self.image_canvas.coords(obj)
 
-    def move_canvas_object_by_offset(self, obj, offset_x, offset_y):
+    def move_canvas_object_by_offset(self, obj: Any, offset_x: int, offset_y: int):
         self.image_canvas.move(obj, offset_x, offset_y)
 
-    def enable_selection_mode(self, event=None):
+    def enable_selection_mode(self, event: Event = None):
         self.controller.model.enabled_selection_mode = True
 
-    def disable_selection_mode(self, event=None):
+    def disable_selection_mode(self, event: Event = None):
         self.controller.model.enabled_selection_mode = False
 
-    def on_mouse_down(self, event):
+    def on_mouse_down(self, event: Event):
         self.controller.start_selection((event.x, event.y))
 
-    def on_mouse_drag(self, event):
+    def on_mouse_drag(self, event: Event):
         self.controller.move_selection((event.x, event.y))
 
-    def on_mouse_up(self, event):
+    def on_mouse_up(self, event: Event):
         self.controller.stop_selection()
 
-    def next_image(self, event=None):
+    def next_image(self, event: Event = None):
         self.controller.next_image()
 
-    def previous_image(self, event=None):
+    def previous_image(self, event: Event = None):
         self.controller.previous_image()
 
-    def on_resize(self, event=None):
+    def on_resize(self, event: Event = None):
         self.controller.display_image_on_canvas(self.controller.model.current_image)
 
-    def save_next(self, event=None):
+    def save_next(self, event: Event = None):
         self.controller.save_next()
 
-    def save(self, event=None):
+    def save(self, event: Event = None):
         self.controller.save()
 
-    def set_title(self, title):
+    def set_title(self, title: str):
         self.master.title(title)
