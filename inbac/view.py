@@ -1,12 +1,13 @@
 import tkinter as tk
-from tkinter import Tk, Frame, Canvas, Event
+from tkinter import Tk, Frame, Canvas, Event, Menu, messagebox
 from typing import Optional, List, Tuple, Any
 from PIL.ImageTk import PhotoImage
+import inbac
 
 class View():
     def __init__(self, master: Tk, initial_window_size: Tuple[int, int]):
         self.master: Tk = master
-        self.frame: Frame = tk.Frame(self.master, relief=tk.RIDGE, borderwidth=2)
+        self.frame: Frame = tk.Frame(self.master, relief=tk.FLAT)
         self.frame.pack(fill=tk.BOTH, expand=tk.YES)
         self.image_canvas: Canvas = Canvas(self.frame, highlightthickness=0)
         self.image_canvas.pack(fill=tk.BOTH, expand=tk.YES)
@@ -14,9 +15,10 @@ class View():
         self.master.update()
         self.controller = None
 
-        self._bind_events()
+        self.bind_events()
+        self.create_menu()
 
-    def _bind_events(self):
+    def bind_events(self):
         self.master.bind('z', self.save_next)
         self.master.bind('x', self.save)
         self.master.bind('<Left>', self.previous_image)
@@ -33,6 +35,24 @@ class View():
         self.master.bind('<KeyRelease-Control_L>', self.disable_selection_mode)
 
         self.image_canvas.bind('<Configure>', self.on_resize)
+
+    def create_menu(self):
+        self.menu: Menu = Menu(self.master, relief=tk.FLAT)
+        self.menu.add_command(label="Open", command=self.open_dialog)
+        self.menu.add_command(label="Settings", command=self.create_settings_window)
+        self.menu.add_command(label="About", command=self.show_about_dialog)
+        self.menu.add_separator()
+        self.menu.add_command(label="Exit", command=self.master.quit)
+        self.master.config(menu=self.menu)
+
+    def open_dialog(self):
+        pass
+
+    def create_settings_window(self):
+        pass
+
+    def show_about_dialog(self):
+        messagebox.showinfo("About", "inbac " + inbac.__version__, parent = self.master)
 
     def display_image(self, image: PhotoImage) -> Any:
         return self.image_canvas.create_image(0, 0, anchor=tk.NW, image=image)
