@@ -53,6 +53,9 @@ class View():
 
     def show_about_dialog(self):
         messagebox.showinfo("About", "inbac " + inbac.__version__, parent = self.master)
+    
+    def show_error(self, title: str, message: str):
+        messagebox.showerror(title, message, parent=self.master)
 
     def display_image(self, image: PhotoImage) -> Any:
         return self.image_canvas.create_image(0, 0, anchor=tk.NW, image=image)

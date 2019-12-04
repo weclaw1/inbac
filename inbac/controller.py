@@ -15,10 +15,16 @@ class Controller():
         self.view: View = view
 
         if self.model.args.input_dir:
-            self.model.images = self.load_image_list(self.model.args.input_dir)
-
+            try:
+                self.model.images = self.load_image_list(self.model.args.input_dir)
+            except OSError:
+                self.view.show_error("Error", "Input directory cannot be opened")
+            
         if self.model.images:
-            self.load_image(self.model.images[self.model.current_file])
+            try:
+                self.load_image(self.model.images[self.model.current_file])
+            except IOError:
+                self.next_image()
 
     def load_image(self, image_name: str):
         if self.model.current_image is not None:

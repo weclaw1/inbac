@@ -1,7 +1,7 @@
 import tkinter as tk
 import os
 
-from tkinter import filedialog, Tk
+from tkinter import filedialog, Tk, messagebox
 from argparse import Namespace
 
 from PIL import Image, ImageTk
@@ -21,10 +21,18 @@ class Application():
         args.output_dir = getattr(args, "output_dir", os.path.join(args.input_dir, "crops"))
 
         if not os.path.exists(args.output_dir):
-            os.makedirs(args.output_dir)
+            self.create_output_directory()
 
         self.controller: Controller = Controller(self.model, self.view)
         self.view.controller = self.controller
+
+    def create_output_directory(self):
+        try:
+            os.makedirs(self.model.args.output_dir)
+        except OSError:
+            messagebox.showerror("Error", "Output directory cannot be created, please select another location", 
+                                 parent=self.view.master)
+            self.model.args.output_dir = filedialog.askdirectory(parent = self.view.master)
 
     def run(self):
         self.view.master.mainloop()
