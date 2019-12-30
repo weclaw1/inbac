@@ -20,19 +20,12 @@ class Application():
             args.input_dir = filedialog.askdirectory(parent = master)
         args.output_dir = getattr(args, "output_dir", os.path.join(args.input_dir, "crops"))
 
-        if not os.path.exists(args.output_dir):
-            self.create_output_directory()
-
         self.controller: Controller = Controller(self.model, self.view)
-        self.view.controller = self.controller
 
-    def create_output_directory(self):
-        try:
-            os.makedirs(self.model.args.output_dir)
-        except OSError:
-            messagebox.showerror("Error", "Output directory cannot be created, please select another location", 
-                                 parent=self.view.master)
-            self.model.args.output_dir = filedialog.askdirectory(parent = self.view.master)
+        if not os.path.exists(args.output_dir):
+            self.controller.create_output_directory()
+
+        self.view.controller = self.controller
 
     def run(self):
         self.view.master.mainloop()

@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import Tk, Frame, Canvas, Event, Menu, messagebox
+import os
+from tkinter import Tk, Frame, Canvas, Event, Menu, messagebox, filedialog
 from typing import Optional, List, Tuple, Any
 from PIL.ImageTk import PhotoImage
 import inbac
@@ -45,8 +46,12 @@ class View():
         self.menu.add_command(label="Exit", command=self.master.quit)
         self.master.config(menu=self.menu)
 
+    def ask_directory(self) -> str:
+        return filedialog.askdirectory(parent=self.master)
+
     def open_dialog(self):
-        pass
+        self.controller.select_images_folder()
+        self.controller.load_images()
 
     def create_settings_window(self):
         pass

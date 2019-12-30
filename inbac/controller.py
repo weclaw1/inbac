@@ -14,17 +14,21 @@ class Controller():
         self.model: Model = model
         self.view: View = view
 
-        if self.model.args.input_dir:
-            try:
-                self.model.images = self.load_image_list(self.model.args.input_dir)
-            except OSError:
-                self.view.show_error("Error", "Input directory cannot be opened")
-            
-        if self.model.images:
-            try:
-                self.load_image(self.model.images[self.model.current_file])
-            except IOError:
-                self.next_image()
+        self.load_images()
+
+    def select_images_folder(self):
+        self.model.args.input_dir = self.view.ask_directory()
+        self.model.args.output_dir = os.path.join(self.model.args.input_dir, "crops")
+
+        if not os.path.exists(self.model.args.output_dir):
+            self.create_output_directory()
+
+    def create_output_directory(self):
+        try:
+            os.makedirs(self.model.args.output_dir)
+        except OSError:
+            self.view.show_error("Error", "Output directory cannot be created, please select output directory location")
+            self.model.args.output_dir = self.view.ask_directory()
 
     def load_image(self, image_name: str):
         if self.model.current_image is not None:
@@ -33,6 +37,20 @@ class Controller():
         image = Image.open(os.path.join(self.model.args.input_dir, image_name))
         self.display_image_on_canvas(image)
         self.view.set_title(image_name)
+    
+    def load_images(self):
+        if self.model.args.input_dir:
+            try:
+                self.model.images = self.load_image_list(self.model.args.input_dir)
+            except OSError:
+                self.view.show_error("Error", "Input directory cannot be opened")
+            
+        if self.model.images:
+            try:
+                self.model.current_file = 0
+                self.load_image(self.model.images[self.model.current_file])
+            except IOError:
+                self.next_image()
 
     def display_image_on_canvas(self, image: Image):
         self.clear_canvas()
