@@ -1,5 +1,6 @@
 import tkinter as tk
 import os
+import types
 from tkinter import Tk, Frame, Canvas, Event, Menu, messagebox, filedialog
 from typing import Optional, List, Tuple, Any
 from PIL.ImageTk import PhotoImage
@@ -54,7 +55,47 @@ class View():
         self.controller.load_images()
 
     def create_settings_window(self):
-        pass
+        settings_window = tk.Toplevel(self.master)
+        settings_window.title("Settings")
+        settings_window.geometry("{}x{}".format(400, 400))
+        settings = types.SimpleNamespace()
+
+        settings.aspect_ratio_checked = tk.IntVar()
+        settings.aspect_ratio_checked.set(self.controller.model.args.aspect_ratio is not None)
+        aspect_ratio_checkbox = tk.Checkbutton(settings_window, variable=settings.aspect_ratio_checked, onvalue=1, offvalue=0, text="Aspect Ratio")
+        aspect_ratio_checkbox.grid(row=0, column=0, columnspan=2, sticky=tk.W)
+
+        settings.aspect_ratio_x = tk.StringVar()
+        if self.controller.model.args.aspect_ratio is not None:
+            settings.aspect_ratio_x.set(self.controller.model.args.aspect_ratio[0])
+        aspect_ratio_x_entry = tk.Entry(settings_window, textvariable=settings.aspect_ratio_x)
+        aspect_ratio_x_entry.grid(row=1, column=0)
+
+        settings.aspect_ratio_y = tk.StringVar()
+        if self.controller.model.args.aspect_ratio is not None:
+            settings.aspect_ratio_y.set(self.controller.model.args.aspect_ratio[1])
+        aspect_ratio_y_entry = tk.Text(settings_window, textvariable=settings.aspect_ratio_y)
+        aspect_ratio_y_entry.grid(row=1, column=1)
+
+        settings.resize_checked = tk.IntVar()
+        settings.resize_checked.set(self.controller.model.args.resize is not None)
+        resize_checkbox = tk.Checkbutton(settings_window, variable=settings.resize_checked, onvalue=1, offvalue=0, text="Resize")
+        resize_checkbox.grid(row=2, column=0, columnspan=2, sticky=tk.W)
+
+        settings.resize_x = tk.StringVar()
+        if self.controller.model.args.resize is not None:
+            settings.resize_x.set(self.controller.model.args.resize[0])
+        resize_x_entry = tk.Entry(settings_window, textvariable=settings.resize_x)
+        resize_x_entry.grid(row=3, column=0)
+
+        settings.resize_y = tk.StringVar()
+        if self.controller.model.args.resize is not None:
+            settings.resize_x.set(self.controller.model.args.resize[1])
+        resize_y_entry = tk.Text(settings_window, textvariable=settings.resize_y)
+        resize_y_entry.grid(row=3, column=1)
+
+        tk.Button(settings_window, text="Save", command=lambda: self.save_settings(settings_window, settings))
+        tk.Button(settings_window, text="Cancel", command=lambda: self.cancel_settings(settings_window))
 
     def show_about_dialog(self):
         messagebox.showinfo("About", "inbac " + inbac.__version__, parent = self.master)
