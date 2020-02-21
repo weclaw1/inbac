@@ -17,11 +17,13 @@ class Controller():
         self.load_images()
 
     def select_images_folder(self):
-        self.model.args.input_dir = self.view.ask_directory()
-        self.model.args.output_dir = os.path.join(self.model.args.input_dir, "crops")
+        input_dir = self.view.ask_directory()
+        if input_dir:
+            self.model.args.input_dir = input_dir
+            self.model.args.output_dir = os.path.join(self.model.args.input_dir, "crops")
 
-        if not os.path.exists(self.model.args.output_dir):
-            self.create_output_directory()
+            if not os.path.exists(self.model.args.output_dir):
+                self.create_output_directory()
 
     def create_output_directory(self):
         try:
