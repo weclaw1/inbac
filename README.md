@@ -37,9 +37,11 @@ Z                                 - save selection and go to the next picture
 
 X                                 - save selection and stay on the same picture
 
+Hold Left Shift or Left Ctrl      - drag selection
+
 Right Arrow or Right Mouse Button - go to next picture
 
-Left Arrow or Left Mouse Button   - go to previous picture
+Left Arrow or Middle Mouse Button - go to previous picture
 
 positional arguments:
   input_dir             input directory (defaults to current working

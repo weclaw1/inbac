@@ -9,8 +9,9 @@ def parse_arguments():
 Left Mouse Button                 - select part of image\n
 Z                                 - save selection and go to the next picture\n
 X                                 - save selection and stay on the same picture\n
+Hold Left Shift or Left Ctrl      - drag selection\n
 Right Arrow or Right Mouse Button - go to next picture\n
-Left Arrow or Left Mouse Button   - go to previous picture\n"""
+Left Arrow or Middle Mouse Button - go to previous picture\n"""
     )
     parser.add_argument("input_dir", nargs="?",
                         help="input directory (defaults to current working directory)", default=None)
