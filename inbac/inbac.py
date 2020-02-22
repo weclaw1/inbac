@@ -32,6 +32,7 @@ class Application():
 
 def main():
     root = tk.Tk()
+    root.title("inbac")
     app = Application(args.parse_arguments(), master=root)
 
     app.run()
