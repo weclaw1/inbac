@@ -21,7 +21,7 @@ jobs:
       run: |
         curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
     - name: Add Poetry to PATH for Windows
-      run: echo "::add-path::%USERPROFILE%\.poetry\bin"
+      run: echo "##[add-path]%USERPROFILE%\.poetry\bin"
       if: matrix.os == 'windows-latest'
     - name: Add Poetry to PATH for Linux
       run: echo "::add-path::$HOME/.poetry/bin"
