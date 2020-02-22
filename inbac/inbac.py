@@ -1,15 +1,14 @@
 import tkinter as tk
 import os
 
-from tkinter import filedialog, Tk, messagebox
+from tkinter import filedialog, Tk
 from argparse import Namespace
 
-from PIL import Image, ImageTk
-
-import inbac.parse_arguments as args
+import inbac.parse_arguments as parse_args
 from inbac.model import Model
 from inbac.view import View
 from inbac.controller import Controller
+
 
 class Application():
     def __init__(self, args: Namespace, master: Tk):
@@ -17,8 +16,9 @@ class Application():
         self.view: View = View(master, args.window_size)
 
         if args.input_dir is None:
-            args.input_dir = filedialog.askdirectory(parent = master)
-        args.output_dir = getattr(args, "output_dir", os.path.join(args.input_dir, "crops"))
+            args.input_dir = filedialog.askdirectory(parent=master)
+        args.output_dir = getattr(
+            args, "output_dir", os.path.join(args.input_dir, "crops"))
 
         self.controller: Controller = Controller(self.model, self.view)
 
@@ -30,10 +30,11 @@ class Application():
     def run(self):
         self.view.master.mainloop()
 
+
 def main():
     root = tk.Tk()
     root.title("inbac")
-    app = Application(args.parse_arguments(), master=root)
+    app = Application(parse_args.parse_arguments(), master=root)
 
     app.run()
 

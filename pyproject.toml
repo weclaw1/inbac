@@ -25,10 +25,10 @@ include = [
 
 [tool.poetry.dependencies]
 python = "^3.6"
-pillow = "^6.2"
+pillow = "^7.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "^3.0"
+pytest = "^5.3"
 pylint = "^2.4"
 autopep8 = "^1.4"
 pyinstaller = "^3.6"

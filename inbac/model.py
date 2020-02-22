@@ -3,6 +3,7 @@ from argparse import Namespace
 from PIL import Image
 from PIL.ImageTk import PhotoImage
 
+
 class Model():
     def __init__(self, args):
         self.args: Namespace = args
