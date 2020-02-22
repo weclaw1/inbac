@@ -8,10 +8,13 @@ inbac is an **in**teractive **ba**tch **c**ropper made for quick cropping of ima
 I made this program because cropping thousands of images with image viewers or image manipulation programs was too slow.
 
 ## Installation
-There are three ways to install this application.
-The easiest option is to download the single file executable created with PyInstaller, which can be found on the releases page.
+
+The easiest way to use this application is to download the single file executable created with PyInstaller, which can be found on the releases page.
+
 If you have python installed you can install with pip by typing:
+
 `pip install inbac`
+
 If you want to use the current master branch you can clone the repository and run the project using poetry.
 
 ## Development Requirements
