@@ -33,6 +33,7 @@ pylint = "^2.4"
 autopep8 = "^1.4"
 pyinstaller = "^3.6"
 macholib = "^1.14"
+pywin32-ctypes = "^0.2.0"
 
 [tool.poetry.scripts]
 inbac = "inbac.inbac:main"
