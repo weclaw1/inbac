@@ -32,7 +32,7 @@ jobs:
     - name: Build
       run: |
         source $HOME/.poetry/env
-        poetry run pyinstaller --onefile --windowed --hidden-import tkinter inbac/inbac.py
+        poetry run pyinstaller --onefile --windowed --hidden-import='PIL._tkinter_finder' inbac/inbac.py
     - name: Upload Artifact
       uses: actions/upload-artifact@v1
       with:
@@ -68,7 +68,7 @@ jobs:
     - name: Build
       run: |
         $env:Path += ";$env:Userprofile\.poetry\bin"
-        poetry run pyinstaller --onefile --windowed --hidden-import tkinter inbac\inbac.py
+        poetry run pyinstaller --onefile --windowed --hidden-import='PIL._tkinter_finder' inbac\inbac.py
     - name: Upload Artifact
       uses: actions/upload-artifact@v1
       with:
@@ -104,7 +104,7 @@ jobs:
     - name: Build
       run: |
         source $HOME/.poetry/env
-        poetry run pyinstaller --onefile --windowed --hidden-import tkinter inbac/inbac.py
+        poetry run pyinstaller --onefile --windowed --hidden-import='PIL._tkinter_finder' inbac/inbac.py
     - name: Upload Artifact
       uses: actions/upload-artifact@v1
       with:
