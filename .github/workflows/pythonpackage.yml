@@ -5,10 +5,11 @@ on: [push]
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: [3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -34,3 +35,12 @@ jobs:
       run: |
         source $HOME/.poetry/env
         poetry run test
+    - name: Build
+      run: |
+        source $HOME/.poetry/env
+        poetry run pyinstaller --onefile --windowed inbac/inbac.py
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1
+      with:
+          name: inbac-${{ runner.os }}
+          path: dist
