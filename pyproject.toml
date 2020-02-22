@@ -32,6 +32,7 @@ pytest = "^3.0"
 pylint = "^2.4"
 autopep8 = "^1.4"
 pyinstaller = "^3.6"
+macholib = "^1.14"
 
 [tool.poetry.scripts]
 inbac = "inbac.inbac:main"
