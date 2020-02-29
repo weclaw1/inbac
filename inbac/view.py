@@ -24,6 +24,7 @@ class View():
     def bind_events(self):
         self.master.bind('z', self.save_next)
         self.master.bind('x', self.save)
+        self.master.bind('c', self.rotate_image)
         self.master.bind('<Left>', self.previous_image)
         self.master.bind('<Right>', self.next_image)
         self.master.bind('<ButtonPress-3>', self.next_image)
@@ -188,3 +189,6 @@ class View():
 
     def set_title(self, title: str):
         self.master.title(title)
+
+    def rotate_image(self, event: Event = None):
+        self.controller.rotate_image()

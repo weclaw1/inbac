@@ -157,6 +157,21 @@ class TestInbac(unittest.TestCase):
         self.assertEqual(image_width / 2, new_width)
         self.assertEqual(image_height / 2, new_height)
 
+    @mock.patch('inbac.view.View')
+    @mock.patch('inbac.controller.Controller.display_image_on_canvas')
+    def test_rotated_image(self, mock_display_image, mock_view):
+        args = mock.Mock()
+        args.input_dir = None
+        model = Model(args)
+        controller = Controller(model, mock_view)
+        image = Image.new("RGB", (8, 4))
+        model.current_image = image
+        controller.rotate_image()
+        rotated_image = mock_display_image.call_args[0][0]
+        mock_display_image.assert_called()
+        self.assertEqual(rotated_image.width, 4)
+        self.assertEqual(rotated_image.height, 8)
+        
 def file_exist(x):
     if x == "/home/test/test.jpg":
         return True

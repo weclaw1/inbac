@@ -164,6 +164,13 @@ class Controller():
         self.clear_selection_box()
         return True
 
+    def rotate_image(self):
+        if self.model.current_image is not None:
+            rotated_image = self.model.current_image.transpose(Image.ROTATE_90)
+            self.model.current_image.close()
+            self.model.current_image = None
+            self.display_image_on_canvas(rotated_image)
+
     @staticmethod
     def calculate_canvas_image_dimensions(image_width: int,
                                           image_height: int,
