@@ -1,4 +1,5 @@
 # inbac
+[![Donate](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/weclaw1/donate)
 
 ![](https://raw.githubusercontent.com/weclaw1/inbac/master/resources/demo.gif)
 
