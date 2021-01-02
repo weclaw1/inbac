@@ -24,9 +24,6 @@ class Controller():
             self.model.args.output_dir = os.path.join(
                 self.model.args.input_dir, "crops")
 
-            if not os.path.exists(self.model.args.output_dir):
-                self.create_output_directory()
-
     def create_output_directory(self):
         try:
             os.makedirs(self.model.args.output_dir)
@@ -160,6 +157,8 @@ class Controller():
                 (self.model.args.resize[0], self.model.args.resize[1]), Image.LANCZOS)
         if self.model.args.image_format:
             new_filename, _ = os.path.splitext(new_filename)
+        if not os.path.exists(self.model.args.output_dir):
+            self.create_output_directory()
         saved_image.save(os.path.join(self.model.args.output_dir, new_filename),
                          self.model.args.image_format, quality=self.model.args.image_quality)
         self.clear_selection_box()

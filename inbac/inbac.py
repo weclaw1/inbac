@@ -22,9 +22,6 @@ class Application():
 
         self.controller: Controller = Controller(self.model, self.view)
 
-        if not os.path.exists(args.output_dir):
-            self.controller.create_output_directory()
-
         self.view.controller = self.controller
 
     def run(self):
