@@ -41,7 +41,8 @@ class Controller():
             self.model.current_image = None
         image = Image.open(os.path.join(self.model.args.input_dir, image_name))
         self.display_image_on_canvas(image)
-        self.view.set_title(image_name)
+        image_name_with_counter = "({0}/{1}): {2}".format(self.model.current_file, len(self.model.images), image_name)
+        self.view.set_title(image_name_with_counter)
 
     def load_images(self):
         if self.model.args.input_dir:
@@ -189,7 +190,7 @@ class Controller():
     def load_image_list(directory: str) -> List[str]:
         images: List[str] = []
 
-        for filename in os.listdir(directory):
+        for filename in sorted(os.listdir(directory)):
             filetype, _ = mimetypes.guess_type(filename)
             if filetype is None or filetype.split("/")[0] != "image":
                 continue
