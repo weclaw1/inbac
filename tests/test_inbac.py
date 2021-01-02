@@ -91,13 +91,14 @@ class TestInbac(unittest.TestCase):
         image_name = "test.jpg"
         model = Model(args)
         controller = Controller(model, mock_view)
+        model.images = [image_name]
         args.input_dir = "/home/test/"
         img = Image.new("RGB", (8, 8))
         mock_image_open.return_value = img
         controller.load_image(image_name)
         mock_image_open.assert_called_with(os.path.join(args.input_dir, image_name))
         mock_display_image.assert_called_with(img)
-        mock_view.set_title.assert_called_with(image_name)
+        mock_view.set_title.assert_called_with("({0}/{1}): {2}".format(model.current_file + 1, len(model.images), image_name))
 
     @mock.patch('inbac.controller.Controller.load_image')
     @mock.patch('inbac.view.View')
