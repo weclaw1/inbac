@@ -25,13 +25,13 @@ include = [
 
 [tool.poetry.dependencies]
 python = "^3.6"
-pillow = "^7.0"
+pillow = "^8.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.3"
-pylint = "^2.4"
-autopep8 = "^1.4"
-pyinstaller = "^3.6"
+pytest = "^6.2"
+pylint = "^2.6"
+autopep8 = "^1.5"
+pyinstaller = "^4.1"
 macholib = "^1.14"
 pywin32-ctypes = "^0.2.0"
 pefile = "^2019.4.18"
