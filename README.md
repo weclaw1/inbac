@@ -48,6 +48,8 @@ Z                                 - save selection and go to the next picture
 
 X                                 - save selection and stay on the same picture
 
+C                                 - rotate current image by 90 degrees
+
 Hold Left Shift or Left Ctrl      - drag selection
 
 Right Arrow or Right Mouse Button - go to next picture
