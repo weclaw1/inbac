@@ -68,7 +68,7 @@ class View():
             self.controller.model.args.aspect_ratio is not None)
         aspect_ratio_checkbox = tk.Checkbutton(
             settings_window, variable=settings.aspect_ratio_checked, onvalue=1, offvalue=0, text="Aspect Ratio")
-        aspect_ratio_checkbox.grid(row=0, column=0, columnspan=2, sticky=tk.W)
+        aspect_ratio_checkbox.grid(row=0, column=0, columnspan=2, sticky=tk.W, padx=5, pady=5)
 
         settings.aspect_ratio_x = tk.StringVar()
         if self.controller.model.args.aspect_ratio is not None:
@@ -76,7 +76,7 @@ class View():
                 str(self.controller.model.args.aspect_ratio[0]))
         aspect_ratio_x_entry = tk.Entry(
             settings_window, width=5, textvariable=settings.aspect_ratio_x, bg="white")
-        aspect_ratio_x_entry.grid(row=1, column=0)
+        aspect_ratio_x_entry.grid(row=1, column=0, padx=5, pady=5)
 
         settings.aspect_ratio_y = tk.StringVar()
         if self.controller.model.args.aspect_ratio is not None:
@@ -84,36 +84,47 @@ class View():
                 str(self.controller.model.args.aspect_ratio[1]))
         aspect_ratio_y_entry = tk.Entry(
             settings_window, width=5, textvariable=settings.aspect_ratio_y, bg="white")
-        aspect_ratio_y_entry.grid(row=1, column=1)
+        aspect_ratio_y_entry.grid(row=1, column=1, padx=5, pady=5)
 
         settings.resize_checked = tk.IntVar()
         settings.resize_checked.set(
             self.controller.model.args.resize is not None)
         resize_checkbox = tk.Checkbutton(
             settings_window, variable=settings.resize_checked, onvalue=1, offvalue=0, text="Resize")
-        resize_checkbox.grid(row=2, column=0, columnspan=2, sticky=tk.W)
+        resize_checkbox.grid(row=2, column=0, columnspan=2, sticky=tk.W, padx=5, pady=5)
 
         settings.resize_x = tk.StringVar()
         if self.controller.model.args.resize is not None:
             settings.resize_x.set(str(self.controller.model.args.resize[0]))
         resize_x_entry = tk.Entry(
             settings_window, width=5, textvariable=settings.resize_x, bg="white")
-        resize_x_entry.grid(row=3, column=0)
+        resize_x_entry.grid(row=3, column=0, padx=5, pady=5)
 
         settings.resize_y = tk.StringVar()
         if self.controller.model.args.resize is not None:
             settings.resize_y.set(str(self.controller.model.args.resize[1]))
         resize_y_entry = tk.Entry(
             settings_window, width=5, textvariable=settings.resize_y, bg="white")
-        resize_y_entry.grid(row=3, column=1)
+        resize_y_entry.grid(row=3, column=1, padx=5, pady=5)
+
+        selection_box_color_label = tk.Label(settings_window, text='Selection box color')
+        selection_box_color_label.grid(row=4, column=0, columnspan=2, padx=5, pady=5)
+
+        settings.selection_box_color_choices = ["black", "white", "red", "green", "blue", "cyan", "yellow", "magenta"]
+        settings.selection_box_color_listbox = tk.Listbox(settings_window, listvariable=tk.StringVar(value=settings.selection_box_color_choices))
+        if self.controller.model.args.selection_box_color in settings.selection_box_color_choices:
+            selection_box_color_index = settings.selection_box_color_choices.index(self.controller.model.args.selection_box_color)
+            settings.selection_box_color_listbox.selection_set(selection_box_color_index)
+            settings.selection_box_color_listbox.see(selection_box_color_index)
+        settings.selection_box_color_listbox.grid(row=5, column=0, columnspan=2, padx=5, pady=5)
 
         save_button = tk.Button(settings_window, text="Save",
                                 command=lambda: self.save_settings(settings_window, settings))
-        save_button.grid(row=4, column=0)
+        save_button.grid(row=6, column=0, padx=5, pady=5)
 
         cancel_button = tk.Button(settings_window, text="Cancel",
                                   command=lambda: self.cancel_settings(settings_window))
-        cancel_button.grid(row=4, column=1)
+        cancel_button.grid(row=6, column=1, padx=5, pady=5)
 
     def save_settings(self, settings_window: Toplevel, settings: types.SimpleNamespace):
         if settings.aspect_ratio_checked.get():
@@ -126,6 +137,10 @@ class View():
                 int(settings.resize_x.get()), int(settings.resize_y.get()))
         else:
             self.controller.model.args.resize = None
+        if settings.selection_box_color_listbox.curselection():
+            self.controller.model.args.selection_box_color = settings.selection_box_color_choices[settings.selection_box_color_listbox.curselection()[0]]
+        else:
+            self.controller.model.args.selection_box_color = "black"
         settings_window.destroy()
 
     def cancel_settings(self, settings_window: Toplevel):
