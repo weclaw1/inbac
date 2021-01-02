@@ -29,7 +29,8 @@ class Controller():
             os.makedirs(self.model.args.output_dir)
         except OSError:
             self.view.show_error(
-                "Error", "Output directory cannot be created, please select output directory location")
+                "Error",
+                "Output directory cannot be created, please select output directory location")
             self.model.args.output_dir = self.view.ask_directory()
 
     def load_image(self, image_name: str):
@@ -38,7 +39,8 @@ class Controller():
             self.model.current_image = None
         image = Image.open(os.path.join(self.model.args.input_dir, image_name))
         self.display_image_on_canvas(image)
-        image_name_with_counter = "({0}/{1}): {2}".format(self.model.current_file + 1, len(self.model.images), image_name)
+        image_name_with_counter = "({0}/{1}): {2}".format(
+            self.model.current_file + 1, len(self.model.images), image_name)
         self.view.set_title(image_name_with_counter)
 
     def load_images(self):
@@ -60,10 +62,11 @@ class Controller():
     def display_image_on_canvas(self, image: Image):
         self.clear_canvas()
         self.model.current_image = image
-        self.model.canvas_image_dimensions = self.calculate_canvas_image_dimensions(self.model.current_image.size[0],
-                                                                                    self.model.current_image.size[1],
-                                                                                    self.view.image_canvas.winfo_width(),
-                                                                                    self.view.image_canvas.winfo_height())
+        self.model.canvas_image_dimensions = self.calculate_canvas_image_dimensions(
+            self.model.current_image.size[0],
+            self.model.current_image.size[1],
+            self.view.image_canvas.winfo_width(),
+            self.view.image_canvas.winfo_height())
         displayed_image: Image = self.model.current_image.copy()
         displayed_image.thumbnail(
             self.model.canvas_image_dimensions, Image.ANTIALIAS)
@@ -159,8 +162,12 @@ class Controller():
             new_filename, _ = os.path.splitext(new_filename)
         if not os.path.exists(self.model.args.output_dir):
             self.create_output_directory()
-        saved_image.save(os.path.join(self.model.args.output_dir, new_filename),
-                         self.model.args.image_format, quality=self.model.args.image_quality)
+        saved_image.save(
+            os.path.join(
+                self.model.args.output_dir,
+                new_filename),
+            self.model.args.image_format,
+            quality=self.model.args.image_quality)
         self.clear_selection_box()
         return True
 
@@ -198,7 +205,8 @@ class Controller():
         return images
 
     @staticmethod
-    def coordinates_in_selection_box(coordinates: Tuple[int, int], selection_box: Tuple[int, int]) -> bool:
+    def coordinates_in_selection_box(
+            coordinates: Tuple[int, int], selection_box: Tuple[int, int]) -> bool:
         return (coordinates[0] > selection_box[0] and coordinates[0] < selection_box[2]
                 and coordinates[1] > selection_box[1] and coordinates[1] < selection_box[3])
 
@@ -208,18 +216,31 @@ class Controller():
         if not os.path.isfile(os.path.join(directory, filename)):
             return filename
         for num in itertools.count(2):
-            if not os.path.isfile(os.path.join(directory, name + str(num) + extension)):
+            if not os.path.isfile(
+                os.path.join(
+                    directory,
+                    name +
+                    str(num) +
+                    extension)):
                 return name + str(num) + extension
 
     @staticmethod
-    def get_selection_box_for_aspect_ratio(selection_box: Tuple[int, int, int, int],
+    def get_selection_box_for_aspect_ratio(selection_box: Tuple[int,
+                                                                int,
+                                                                int,
+                                                                int],
                                            aspect_ratio: float,
-                                           mouse_press_coord: Tuple[int, int],
-                                           mouse_move_coord: Tuple[int, int]) -> Tuple[int, int, int, int]:
+                                           mouse_press_coord: Tuple[int,
+                                                                    int],
+                                           mouse_move_coord: Tuple[int,
+                                                                   int]) -> Tuple[int,
+                                                                                  int,
+                                                                                  int,
+                                                                                  int]:
         selection_box: List[int] = list(selection_box)
         width: int = selection_box[2] - selection_box[0]
         height: int = selection_box[3] - selection_box[1]
-        if float(width)/float(height) > aspect_ratio:
+        if float(width) / float(height) > aspect_ratio:
             height = round(width / aspect_ratio)
             if mouse_move_coord[1] > mouse_press_coord[1]:
                 selection_box[3] = selection_box[1] + height
@@ -234,8 +255,15 @@ class Controller():
         return tuple(selection_box)
 
     @staticmethod
-    def get_selected_box(mouse_press_coord: Tuple[int, int], mouse_move_coord: Tuple[int, int],
-                         aspect_ratio: Optional[Tuple[int, int]]) -> Tuple[int, int, int, int]:
+    def get_selected_box(mouse_press_coord: Tuple[int,
+                                                  int],
+                         mouse_move_coord: Tuple[int,
+                                                 int],
+                         aspect_ratio: Optional[Tuple[int,
+                                                      int]]) -> Tuple[int,
+                                                                      int,
+                                                                      int,
+                                                                      int]:
         selection_top_left_x: int = min(
             mouse_press_coord[0], mouse_move_coord[0])
         selection_top_left_y: int = min(
@@ -244,25 +272,43 @@ class Controller():
             mouse_press_coord[0], mouse_move_coord[0])
         selection_bottom_right_y: int = max(
             mouse_press_coord[1], mouse_move_coord[1])
-        selection_box: Tuple[int, int, int, int] = (selection_top_left_x, selection_top_left_y,
-                                                    selection_bottom_right_x, selection_bottom_right_y)
+        selection_box: Tuple[int,
+                             int,
+                             int,
+                             int] = (selection_top_left_x,
+                                     selection_top_left_y,
+                                     selection_bottom_right_x,
+                                     selection_bottom_right_y)
 
         if aspect_ratio is not None:
-            aspect_ratio: float = float(aspect_ratio[0])/float(aspect_ratio[1])
+            aspect_ratio: float = float(
+                aspect_ratio[0]) / float(aspect_ratio[1])
             try:
-                selection_box: Tuple[int, int, int, int] = Controller.get_selection_box_for_aspect_ratio(selection_box, aspect_ratio,
-                                                                                                         mouse_press_coord, mouse_move_coord)
+                selection_box: Tuple[int, int, int, int] = Controller.get_selection_box_for_aspect_ratio(
+                    selection_box, aspect_ratio, mouse_press_coord, mouse_move_coord)
             except ZeroDivisionError:
                 pass
 
         return selection_box
 
     @staticmethod
-    def get_real_box(selected_box: Tuple[int, int, int, int], original_image_size: Tuple[int, int],
-                     displayed_image_size: Tuple[int, int]) -> Tuple[int, int, int, int]:
-        return (int(selected_box[0] * original_image_size[0]/displayed_image_size[0]),
-                int(selected_box[1] * original_image_size[1] /
-                    displayed_image_size[1]),
-                int(selected_box[2] * original_image_size[0] /
-                    displayed_image_size[0]),
-                int(selected_box[3] * original_image_size[1]/displayed_image_size[1]))
+    def get_real_box(selected_box: Tuple[int,
+                                         int,
+                                         int,
+                                         int],
+                     original_image_size: Tuple[int,
+                                                int],
+                     displayed_image_size: Tuple[int,
+                                                 int]) -> Tuple[int,
+                                                                int,
+                                                                int,
+                                                                int]:
+        return (int(selected_box[0] *
+                    original_image_size[0] /
+                    displayed_image_size[0]), int(selected_box[1] *
+                                                  original_image_size[1] /
+                                                  displayed_image_size[1]), int(selected_box[2] *
+                                                                                original_image_size[0] /
+                                                                                displayed_image_size[0]), int(selected_box[3] *
+                                                                                                              original_image_size[1] /
+                                                                                                              displayed_image_size[1]))

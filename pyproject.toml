@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "inbac"
-version = "2.0.0"
+version = "2.1.0"
 description = "Interactive batch cropper made for quick cropping of images."
 authors = ["Robert Węcławski <r.weclawski@gmail.com>"]
 license = "MIT"
