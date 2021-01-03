@@ -34,7 +34,7 @@ jobs:
         source $HOME/.poetry/env
         poetry run pyinstaller --onefile --windowed --hidden-import='PIL._tkinter_finder' inbac/inbac.py
     - name: Upload Artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
           name: inbac-${{ runner.os }}
           path: dist
@@ -52,11 +52,6 @@ jobs:
         curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
         $env:Path += ";$env:Userprofile\.poetry\bin"
         poetry config virtualenvs.in-project true
-    - name: Set up cache
-      uses: actions/cache@v2
-      with:
-        path: .venv
-        key: venv-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('**/poetry.lock') }}
     - name: Install dependencies
       run: |
         $env:Path += ";$env:Userprofile\.poetry\bin"
@@ -70,7 +65,7 @@ jobs:
         $env:Path += ";$env:Userprofile\.poetry\bin"
         poetry run pyinstaller --onefile --windowed --hidden-import='PIL._tkinter_finder' inbac\inbac.py
     - name: Upload Artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
           name: inbac-${{ runner.os }}
           path: dist
@@ -106,7 +101,7 @@ jobs:
         source $HOME/.poetry/env
         poetry run pyinstaller --onefile --windowed --hidden-import='PIL._tkinter_finder' inbac/inbac.py
     - name: Upload Artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
           name: inbac-${{ runner.os }}
           path: dist
