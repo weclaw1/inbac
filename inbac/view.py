@@ -25,6 +25,7 @@ class View():
         self.master.bind('z', self.save_next)
         self.master.bind('x', self.save)
         self.master.bind('c', self.rotate_image)
+        self.master.bind('r', self.rotate_aspect_ratio)
         self.master.bind('<Left>', self.previous_image)
         self.master.bind('<Right>', self.next_image)
         self.master.bind('<ButtonPress-3>', self.next_image)
@@ -260,3 +261,6 @@ class View():
 
     def rotate_image(self, event: Event = None):
         self.controller.rotate_image()
+
+    def rotate_aspect_ratio(self, event: Event = None):
+        self.controller.rotate_aspect_ratio()

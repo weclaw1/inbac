@@ -177,6 +177,11 @@ class Controller():
             self.model.current_image.close()
             self.model.current_image = None
             self.display_image_on_canvas(rotated_image)
+    
+    def rotate_aspect_ratio(self):
+        if self.model.args.aspect_ratio is not None:
+            self.model.args.aspect_ratio = (
+                int(self.model.args.aspect_ratio[1]), int(self.model.args.aspect_ratio[0]))
 
     @staticmethod
     def calculate_canvas_image_dimensions(image_width: int,
