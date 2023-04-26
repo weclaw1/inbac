@@ -62,11 +62,19 @@ class Controller():
     def display_image_on_canvas(self, image: Image):
         self.clear_canvas()
         self.model.current_image = image
-        self.model.canvas_image_dimensions = self.calculate_canvas_image_dimensions(
+        self.model.canvas_image_scaling_ratio = self.calculate_canvas_image_scaling(
             self.model.current_image.size[0],
             self.model.current_image.size[1],
             self.view.image_canvas.winfo_width(),
             self.view.image_canvas.winfo_height())
+        if self.model.canvas_image_scaling_ratio is None:
+            self.model.canvas_image_dimensions = self.model.current_image.size
+            self.model.canvas_image_scaling_ratio = 1.0
+        else:
+            self.model.canvas_image_dimensions = self.calculate_canvas_image_dimensions(
+                self.model.current_image.size[0],
+                self.model.current_image.size[1],
+                self.model.canvas_image_scaling_ratio)
         displayed_image: Image = self.model.current_image.copy()
         displayed_image.thumbnail(
             self.model.canvas_image_dimensions, Image.ANTIALIAS)
@@ -102,6 +110,7 @@ class Controller():
     def start_selection(self, press_coord: Tuple[int, int]):
         self.model.press_coord = press_coord
         self.model.move_coord = press_coord
+
         if self.model.enabled_selection_mode and self.model.selection_box is not None:
             selected_box: Tuple[int, int, int, int] = self.view.get_canvas_object_coords(
                 self.model.selection_box)
@@ -152,6 +161,11 @@ class Controller():
             self.model.selection_box)
         box: Tuple[int, int, int, int] = self.get_real_box(
             selected_box, self.model.current_image.size, self.model.canvas_image_dimensions)
+        if self.model.selected_fixed_size is not None:
+            box = [box[0],
+                   box[1],
+                   box[0] + self.model.selected_fixed_size[0],
+                   box[1] + self.model.selected_fixed_size[1]]
         new_filename: str = self.find_available_name(
             self.model.args.output_dir, self.model.images[self.model.current_file])
         saved_image: Image = self.model.current_image.copy().crop(box)
@@ -177,25 +191,30 @@ class Controller():
             self.model.current_image.close()
             self.model.current_image = None
             self.display_image_on_canvas(rotated_image)
-    
+
     def rotate_aspect_ratio(self):
         if self.model.args.aspect_ratio is not None:
             self.model.args.aspect_ratio = (
                 int(self.model.args.aspect_ratio[1]), int(self.model.args.aspect_ratio[0]))
 
     @staticmethod
-    def calculate_canvas_image_dimensions(image_width: int,
-                                          image_height: int,
-                                          canvas_width: int,
-                                          canvas_height: int) -> Tuple[int, int]:
+    def calculate_canvas_image_scaling(image_width: int,
+                                       image_height: int,
+                                       canvas_width: int,
+                                       canvas_height: int) -> Optional[float]:
         if image_width > canvas_width or image_height > canvas_height:
             width_ratio: float = canvas_width / image_width
             height_ratio: float = canvas_height / image_height
-            ratio: float = min(width_ratio, height_ratio)
-            new_image_width: int = int(image_width * ratio)
-            new_image_height: int = int(image_height * ratio)
-            return (new_image_width, new_image_height)
-        return (image_width, image_height)
+            return min(width_ratio, height_ratio)
+        return None
+
+    @staticmethod
+    def calculate_canvas_image_dimensions(image_width: int,
+                                          image_height: int,
+                                          scaling_ratio: float) -> Tuple[int, int]:
+        new_image_width: int = int(image_width * scaling_ratio)
+        new_image_height: int = int(image_height * scaling_ratio)
+        return (new_image_width, new_image_height)
 
     @staticmethod
     def load_image_list(directory: str) -> List[str]:
@@ -259,8 +278,8 @@ class Controller():
                 selection_box[0] = selection_box[2] - width
         return tuple(selection_box)
 
-    @staticmethod
-    def get_selected_box(mouse_press_coord: Tuple[int,
+    def get_selected_box(self,
+                         mouse_press_coord: Tuple[int,
                                                   int],
                          mouse_move_coord: Tuple[int,
                                                  int],
@@ -269,6 +288,13 @@ class Controller():
                                                                       int,
                                                                       int,
                                                                       int]:
+
+        if self.model.selected_fixed_size is not None:
+            mouse_press_coord = mouse_move_coord
+            mouse_move_coord = (mouse_press_coord[0] + self.model.selected_fixed_size[0] * self.model.canvas_image_scaling_ratio,
+                                mouse_press_coord[1] + self.model.selected_fixed_size[1] * self.model.canvas_image_scaling_ratio)
+
+
         selection_top_left_x: int = min(
             mouse_press_coord[0], mouse_move_coord[0])
         selection_top_left_y: int = min(
