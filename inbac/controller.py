@@ -1,6 +1,7 @@
 import itertools
 import mimetypes
 import os
+import shutil
 
 from typing import Optional, List, Tuple
 
@@ -182,6 +183,16 @@ class Controller():
                 new_filename),
             self.model.args.image_format,
             quality=self.model.args.image_quality)
+
+        if self.model.args.copy_tag_files:
+            original_filename, _ = os.path.splitext(self.model.images[self.model.current_file])
+            tag_file = os.path.join(self.model.args.input_dir, f"{original_filename}.txt")
+            if os.path.exists(tag_file):
+                target_tag_base, _ = os.path.splitext(new_filename)
+                target_tag_file = os.path.join(self.model.args.output_dir, f"{target_tag_base}.txt")
+                if not os.path.exists(target_tag_file):
+                    shutil.copyfile(tag_file, target_tag_file, follow_symlinks=True)
+
         self.clear_selection_box()
         return True
 

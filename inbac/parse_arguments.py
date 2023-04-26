@@ -69,6 +69,11 @@ Left Arrow or Middle Mouse Button - go to previous picture\n"""
         default=[],
         dest='fixed_sizes',
         help="a fixed crop size to use (example: 1920x1080): may be specified multiple times")
+    parser.add_argument(
+        "--copy_tag_files",
+        action="store_true",
+        default=False,
+        help="if set, copy any .txt file with the same basename to the output directory and name it like the crop")
     parser.add_argument("-f", "--image_format",
                         help="define the croped image format")
     parser.add_argument("-q", "--image_quality", type=int,
