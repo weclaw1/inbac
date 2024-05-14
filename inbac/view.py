@@ -26,6 +26,7 @@ class View():
         self.master.bind('x', self.save)
         self.master.bind('c', self.rotate_image)
         self.master.bind('r', self.rotate_aspect_ratio)
+        self.master.bind('f', self.cycle_fixed_selection_sizes)
         self.master.bind('<Left>', self.previous_image)
         self.master.bind('<Right>', self.next_image)
         self.master.bind('<ButtonPress-3>', self.next_image)
@@ -264,3 +265,19 @@ class View():
 
     def rotate_aspect_ratio(self, event: Event = None):
         self.controller.rotate_aspect_ratio()
+
+    def cycle_fixed_selection_sizes(self, event: Event = None):
+        model = self.controller.model
+        if len(model.args.fixed_sizes) == 0:
+            return
+
+        if model.selected_fixed_size_index is None:
+            model.selected_fixed_size_index = 0
+        else:
+            model.selected_fixed_size_index += 1
+
+        if model.selected_fixed_size_index == len(model.args.fixed_sizes):
+            model.selected_fixed_size_index = None
+            model.selected_fixed_size = None
+        else:
+            model.selected_fixed_size = model.args.fixed_sizes[model.selected_fixed_size_index]
