@@ -154,8 +154,8 @@ class View():
         settings.selection_box_color_choices = [
             "black", "white", "red", "green", "blue", "cyan", "yellow", "magenta"]
         settings.selection_box_color_listbox = tk.Listbox(
-            settings_window, listvariable=tk.ListVar( # type: ignore
-                value=settings.selection_box_color_choices))
+            settings_window, listvariable=tk.StringVar(
+                value=settings.selection_box_color_choices)) # type: ignore
         if self.controller.model.args.selection_box_color in settings.selection_box_color_choices:
             selection_box_color_index = settings.selection_box_color_choices.index(
                 self.controller.model.args.selection_box_color)
