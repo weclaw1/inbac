@@ -10,7 +10,6 @@ from PIL import Image, ImageTk
 from inbac.model import Model
 from inbac.view import View
 
-
 class Controller():
     def __init__(self, model: Model, view: View):
         self.model: Model = model
@@ -60,9 +59,11 @@ class Controller():
             except IOError:
                 self.next_image()
 
-    def display_image_on_canvas(self, image: Image):
+    def display_image_on_canvas(self, image: Image.Image):
         self.clear_canvas()
         self.model.current_image = image
+        if self.model.current_image is None:
+            return
         self.model.canvas_image_scaling_ratio = self.calculate_canvas_image_scaling(
             self.model.current_image.size[0],
             self.model.current_image.size[1],
@@ -76,9 +77,9 @@ class Controller():
                 self.model.current_image.size[0],
                 self.model.current_image.size[1],
                 self.model.canvas_image_scaling_ratio)
-        displayed_image: Image = self.model.current_image.copy()
+        displayed_image: Image.Image = self.model.current_image.copy()
         displayed_image.thumbnail(
-            self.model.canvas_image_dimensions, Image.ANTIALIAS)
+            self.model.canvas_image_dimensions, Image.Resampling.LANCZOS)
         self.model.displayed_image = ImageTk.PhotoImage(displayed_image)
         self.model.canvas_image = self.view.display_image(
             self.model.displayed_image)
@@ -96,6 +97,7 @@ class Controller():
 
     def update_selection_box(self):
         selected_box: Tuple[int, int, int, int] = self.get_selected_box(
+            self.model.selected_fixed_size, self.model.canvas_image_scaling_ratio,
             self.model.press_coord, self.model.move_coord, self.model.args.aspect_ratio)
 
         if self.model.selection_box is None:
@@ -156,23 +158,23 @@ class Controller():
             self.next_image()
 
     def save(self) -> bool:
-        if self.model.selection_box is None:
+        if self.model.selection_box is None or self.model.current_image is None:
             return False
         selected_box: Tuple[int, int, int, int] = self.view.get_canvas_object_coords(
             self.model.selection_box)
         box: Tuple[int, int, int, int] = self.get_real_box(
             selected_box, self.model.current_image.size, self.model.canvas_image_dimensions)
         if self.model.selected_fixed_size is not None:
-            box = [box[0],
+            box = (box[0],
                    box[1],
                    box[0] + self.model.selected_fixed_size[0],
-                   box[1] + self.model.selected_fixed_size[1]]
+                   box[1] + self.model.selected_fixed_size[1])
         new_filename: str = self.find_available_name(
             self.model.args.output_dir, self.model.images[self.model.current_file])
-        saved_image: Image = self.model.current_image.copy().crop(box)
+        saved_image: Image.Image = self.model.current_image.copy().crop(box)
         if self.model.args.resize:
             saved_image = saved_image.resize(
-                (self.model.args.resize[0], self.model.args.resize[1]), Image.LANCZOS)
+                (self.model.args.resize[0], self.model.args.resize[1]), Image.Resampling.LANCZOS)
         if self.model.args.image_format:
             new_filename, _ = os.path.splitext(new_filename)
         if not os.path.exists(self.model.args.output_dir):
@@ -198,7 +200,7 @@ class Controller():
 
     def rotate_image(self):
         if self.model.current_image is not None:
-            rotated_image = self.model.current_image.transpose(Image.ROTATE_90)
+            rotated_image = self.model.current_image.transpose(Image.Transpose.ROTATE_90)
             self.model.current_image.close()
             self.model.current_image = None
             self.display_image_on_canvas(rotated_image)
@@ -241,7 +243,7 @@ class Controller():
 
     @staticmethod
     def coordinates_in_selection_box(
-            coordinates: Tuple[int, int], selection_box: Tuple[int, int]) -> bool:
+            coordinates: Tuple[int, int], selection_box: Tuple[int, int, int, int]) -> bool:
         return (coordinates[0] > selection_box[0] and coordinates[0] < selection_box[2]
                 and coordinates[1] > selection_box[1] and coordinates[1] < selection_box[3])
 
@@ -258,6 +260,7 @@ class Controller():
                     str(num) +
                     extension)):
                 return name + str(num) + extension
+        raise ValueError("No available name found")
 
     @staticmethod
     def get_selection_box_for_aspect_ratio(selection_box: Tuple[int,
@@ -272,24 +275,26 @@ class Controller():
                                                                                   int,
                                                                                   int,
                                                                                   int]:
-        selection_box: List[int] = list(selection_box)
         width: int = selection_box[2] - selection_box[0]
         height: int = selection_box[3] - selection_box[1]
         if float(width) / float(height) > aspect_ratio:
             height = round(width / aspect_ratio)
             if mouse_move_coord[1] > mouse_press_coord[1]:
-                selection_box[3] = selection_box[1] + height
+                return (selection_box[0], selection_box[1], selection_box[2], selection_box[1] + height)
             else:
-                selection_box[1] = selection_box[3] - height
+                return (selection_box[0], selection_box[3] - height, selection_box[2], selection_box[3])
         else:
             width = round(height * aspect_ratio)
             if mouse_move_coord[0] > mouse_press_coord[0]:
-                selection_box[2] = selection_box[0] + width
+                return (selection_box[0], selection_box[1], selection_box[0] + width, selection_box[3])
             else:
-                selection_box[0] = selection_box[2] - width
-        return tuple(selection_box)
+                return (selection_box[2] - width, selection_box[1], selection_box[2], selection_box[3])
 
-    def get_selected_box(self,
+
+    @staticmethod
+    def get_selected_box(selected_fixed_size: Optional[Tuple[int,
+                                                              int]],
+                         canvas_image_scaling_ratio: Optional[float],
                          mouse_press_coord: Tuple[int,
                                                   int],
                          mouse_move_coord: Tuple[int,
@@ -300,10 +305,10 @@ class Controller():
                                                                       int,
                                                                       int]:
 
-        if self.model.selected_fixed_size is not None:
+        if selected_fixed_size is not None and canvas_image_scaling_ratio is not None:
             mouse_press_coord = mouse_move_coord
-            mouse_move_coord = (mouse_press_coord[0] + self.model.selected_fixed_size[0] * self.model.canvas_image_scaling_ratio,
-                                mouse_press_coord[1] + self.model.selected_fixed_size[1] * self.model.canvas_image_scaling_ratio)
+            mouse_move_coord = (int(mouse_press_coord[0] + selected_fixed_size[0] * canvas_image_scaling_ratio),
+                                int(mouse_press_coord[1] + selected_fixed_size[1] * canvas_image_scaling_ratio))
 
 
         selection_top_left_x: int = min(
@@ -323,11 +328,9 @@ class Controller():
                                      selection_bottom_right_y)
 
         if aspect_ratio is not None:
-            aspect_ratio: float = float(
-                aspect_ratio[0]) / float(aspect_ratio[1])
             try:
                 selection_box: Tuple[int, int, int, int] = Controller.get_selection_box_for_aspect_ratio(
-                    selection_box, aspect_ratio, mouse_press_coord, mouse_move_coord)
+                    selection_box, float(aspect_ratio[0]) / float(aspect_ratio[1]), mouse_press_coord, mouse_move_coord)
             except ZeroDivisionError:
                 pass
 

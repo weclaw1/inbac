@@ -1,10 +1,12 @@
 import tkinter as tk
 import types
 from tkinter import Tk, Frame, Canvas, Event, Menu, messagebox, filedialog, Toplevel
-from typing import Tuple, Any
+from typing import Tuple, Any, Optional
 from PIL.ImageTk import PhotoImage
 import inbac
-
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from inbac.controller import Controller
 
 class View():
     def __init__(self, master: Tk, initial_window_size: Tuple[int, int]):
@@ -16,7 +18,7 @@ class View():
         self.master.geometry(
             str(initial_window_size[0]) + "x" + str(initial_window_size[1]))
         self.master.update()
-        self.controller = None
+        self.controller: Optional['Controller'] = None
 
         self.bind_events()
         self.create_menu()
@@ -56,10 +58,13 @@ class View():
         return filedialog.askdirectory(parent=self.master)
 
     def open_dialog(self):
-        self.controller.select_images_folder()
-        self.controller.load_images()
+        if self.controller is not None:
+            self.controller.select_images_folder()
+            self.controller.load_images()
 
     def create_settings_window(self):
+        if self.controller is None:
+            return
         settings_window = tk.Toplevel(self.master)
         settings_window.title("Settings")
         settings_window.geometry("{}x{}".format(400, 400))
@@ -149,7 +154,7 @@ class View():
         settings.selection_box_color_choices = [
             "black", "white", "red", "green", "blue", "cyan", "yellow", "magenta"]
         settings.selection_box_color_listbox = tk.Listbox(
-            settings_window, listvariable=tk.StringVar(
+            settings_window, listvariable=tk.ListVar( # type: ignore
                 value=settings.selection_box_color_choices))
         if self.controller.model.args.selection_box_color in settings.selection_box_color_choices:
             selection_box_color_index = settings.selection_box_color_choices.index(
@@ -176,6 +181,8 @@ class View():
 
     def save_settings(self, settings_window: Toplevel,
                       settings: types.SimpleNamespace):
+        if self.controller is None:
+            return
         if settings.aspect_ratio_checked.get():
             self.controller.model.args.aspect_ratio = (
                 int(settings.aspect_ratio_x.get()), int(settings.aspect_ratio_y.get()))
@@ -213,7 +220,7 @@ class View():
             self, box: Tuple[int, int, int, int], outline_color: str) -> Any:
         return self.image_canvas.create_rectangle(box, outline=outline_color)
 
-    def change_canvas_object_coords(self, obj: Any, coords: Tuple[int, int]):
+    def change_canvas_object_coords(self, obj: Any, coords: Tuple[int, int, int, int]):
         self.image_canvas.coords(obj, coords)
 
     def get_canvas_object_coords(self, obj: Any) -> Any:
@@ -226,58 +233,71 @@ class View():
             offset_y: int):
         self.image_canvas.move(obj, offset_x, offset_y)
 
-    def enable_selection_mode(self, event: Event = None):
-        self.controller.model.enabled_selection_mode = True
+    def enable_selection_mode(self, event: Optional[Event] = None):
+        if self.controller is not None:
+            self.controller.model.enabled_selection_mode = True
 
-    def disable_selection_mode(self, event: Event = None):
-        self.controller.model.enabled_selection_mode = False
+    def disable_selection_mode(self, event: Optional[Event] = None):
+        if self.controller is not None:
+            self.controller.model.enabled_selection_mode = False
 
     def on_mouse_down(self, event: Event):
-        self.controller.start_selection((event.x, event.y))
+        if self.controller is not None:
+            self.controller.start_selection((event.x, event.y))
 
     def on_mouse_drag(self, event: Event):
-        self.controller.move_selection((event.x, event.y))
+        if self.controller is not None:
+            self.controller.move_selection((event.x, event.y))
 
     def on_mouse_up(self, event: Event):
-        self.controller.stop_selection()
+        if self.controller is not None:
+            self.controller.stop_selection()
 
-    def next_image(self, event: Event = None):
-        self.controller.next_image()
+    def next_image(self, event: Optional[Event] = None):
+        if self.controller is not None:
+            self.controller.next_image()
 
-    def previous_image(self, event: Event = None):
-        self.controller.previous_image()
+    def previous_image(self, event: Optional[Event] = None):
+        if self.controller is not None:
+            self.controller.previous_image()
 
-    def on_resize(self, event: Event = None):
-        self.controller.display_image_on_canvas(
-            self.controller.model.current_image)
+    def on_resize(self, event: Optional[Event] = None):
+        if self.controller is not None and self.controller.model.current_image is not None:
+            self.controller.display_image_on_canvas(
+                self.controller.model.current_image)
 
-    def save_next(self, event: Event = None):
-        self.controller.save_next()
+    def save_next(self, event: Optional[Event] = None):
+        if self.controller is not None:
+            self.controller.save_next()
 
-    def save(self, event: Event = None):
-        self.controller.save()
+    def save(self, event: Optional[Event] = None):
+        if self.controller is not None:
+            self.controller.save()
 
     def set_title(self, title: str):
         self.master.title(title)
 
-    def rotate_image(self, event: Event = None):
-        self.controller.rotate_image()
+    def rotate_image(self, event: Optional[Event] = None):
+        if self.controller is not None:
+            self.controller.rotate_image()
 
-    def rotate_aspect_ratio(self, event: Event = None):
-        self.controller.rotate_aspect_ratio()
+    def rotate_aspect_ratio(self, event: Optional[Event] = None):
+        if self.controller is not None:
+            self.controller.rotate_aspect_ratio()
 
-    def cycle_fixed_selection_sizes(self, event: Event = None):
-        model = self.controller.model
-        if len(model.args.fixed_sizes) == 0:
-            return
+    def cycle_fixed_selection_sizes(self, event: Optional[Event] = None):
+        if self.controller is not None:
+            model = self.controller.model
+            if len(model.args.fixed_sizes) == 0:
+                return
 
-        if model.selected_fixed_size_index is None:
-            model.selected_fixed_size_index = 0
-        else:
-            model.selected_fixed_size_index += 1
+            if model.selected_fixed_size_index is None:
+                model.selected_fixed_size_index = 0
+            else:
+                model.selected_fixed_size_index += 1
 
-        if model.selected_fixed_size_index == len(model.args.fixed_sizes):
-            model.selected_fixed_size_index = None
-            model.selected_fixed_size = None
-        else:
-            model.selected_fixed_size = model.args.fixed_sizes[model.selected_fixed_size_index]
+            if model.selected_fixed_size_index == len(model.args.fixed_sizes):
+                model.selected_fixed_size_index = None
+                model.selected_fixed_size = None
+            else:
+                model.selected_fixed_size = model.args.fixed_sizes[model.selected_fixed_size_index]
