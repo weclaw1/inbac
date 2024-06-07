@@ -1,4 +1,4 @@
-name: Python package
+name: Inbac Ci
 
 on: [push]
 
@@ -6,20 +6,19 @@ jobs:
   Linux:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Python 3.8
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: 3.8
+        cache: 'poetry'
+    - name: Install tkinter
+      run: |
+        sudo apt-get update
+        sudo apt-get install python3-tk
     - name: Install and set up Poetry
       run: |
         pipx install poetry
-        poetry config virtualenvs.in-project true
-    - name: Set up cache
-      uses: actions/cache@v2
-      with:
-        path: .venv
-        key: venv-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('**/poetry.lock') }}
     - name: Install dependencies
       run: |
         poetry install
@@ -30,7 +29,7 @@ jobs:
       run: |
         poetry run pyinstaller --onefile --windowed --hidden-import='PIL._tkinter_finder' inbac/inbac.py
     - name: Upload Artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
           name: inbac-${{ runner.os }}
           path: dist
@@ -38,15 +37,15 @@ jobs:
   Windows:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Python 3.8
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: 3.8
+        cache: 'poetry'
     - name: Install and set up Poetry
       run: |
         pipx install poetry
-        poetry config virtualenvs.in-project true
     - name: Install dependencies
       run: |
         poetry install
@@ -57,7 +56,7 @@ jobs:
       run: |
         poetry run pyinstaller --onefile --windowed --hidden-import='PIL._tkinter_finder' inbac\inbac.py
     - name: Upload Artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
           name: inbac-${{ runner.os }}
           path: dist
@@ -65,20 +64,18 @@ jobs:
   MacOS:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Python 3.8
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: 3.8
+        cache: 'poetry'
+    - name: Install tkinter
+      run: |
+        brew install python-tk
     - name: Install and set up Poetry
       run: |
         pipx install poetry
-        poetry config virtualenvs.in-project true
-    - name: Set up cache
-      uses: actions/cache@v2
-      with:
-        path: .venv
-        key: venv-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('**/poetry.lock') }}
     - name: Install dependencies
       run: |
         poetry install
@@ -89,7 +86,7 @@ jobs:
       run: |
         poetry run pyinstaller --onefile --windowed --hidden-import='PIL._tkinter_finder' inbac/inbac.py
     - name: Upload Artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
           name: inbac-${{ runner.os }}
           path: dist
