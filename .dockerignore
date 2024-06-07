@@ -1,0 +1,9 @@
+Dockerfile
+LICENSE
+README.md
+.gitignore
+.vscode/
+.github/
+.git/
+**/__pycache__/
+resources/
