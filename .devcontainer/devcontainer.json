@@ -4,10 +4,14 @@
 		"dockerfile": "Dockerfile"
 	},
 
-	// Uncomment the next line to run commands after the container is created.
-	// "postCreateCommand": "cat /etc/os-release",
+	"containerEnv": {
+		"SHELL": "/bin/bash"
+	},
 
-	// Configure tool-specific properties.
+	"mounts": [
+		"source=${localEnv:HOME},target=/home/${localEnv:USER},type=bind,consistency=cached"
+	],
+	
 	"customizations": {
 		"vscode": {
 			"extensions": [
