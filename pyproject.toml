@@ -22,24 +22,25 @@ classifiers = [
 include = [
     "LICENSE",
 ]
+packages = [{include = "inbac"}]
 
 [tool.poetry.dependencies]
-python = "^3.6"
-pillow = "^8.0"
+python = ">= 3.8, < 3.13"
+pillow = "^10.3"
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.2"
-pylint = "^2.6"
-autopep8 = "^1.5"
-pyinstaller = "^4.1"
-macholib = "^1.14"
-pywin32-ctypes = "^0.2.0"
-pefile = "^2019.4.18"
+pytest = "^8.2"
+pylint = "^3.2"
+autopep8 = "^2.1"
+pyinstaller = "^6.6"
+macholib = "^1.16"
+pywin32-ctypes = "^0.2"
+pefile = "^2023.2.7"
 
 [tool.poetry.scripts]
 inbac = "inbac.inbac:main"
 test = "tests.test_inbac:main"
 
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

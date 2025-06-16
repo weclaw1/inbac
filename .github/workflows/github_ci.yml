@@ -1,0 +1,89 @@
+name: Inbac Ci
+
+on: [push]
+
+jobs:
+  Linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install poetry
+      run: pipx install poetry
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.8
+        cache: 'poetry'
+    - name: Install tkinter
+      run: |
+        sudo apt-get update
+        sudo apt-get install python3-tk
+    - name: Install dependencies
+      run: |
+        poetry install
+    - name: Test
+      run: |
+        poetry run test
+    - name: Build
+      run: |
+        poetry run pyinstaller --onefile --windowed --hidden-import='PIL._tkinter_finder' inbac/inbac.py
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+          name: inbac-${{ runner.os }}
+          path: dist
+
+  Windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install poetry
+      run: pipx install poetry
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.8
+        cache: 'poetry'
+    - name: Install dependencies
+      run: |
+        poetry install
+    - name: Test
+      run: |
+        poetry run test
+    - name: Build
+      run: |
+        poetry run pyinstaller --onefile --windowed --hidden-import='PIL._tkinter_finder' inbac\inbac.py
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+          name: inbac-${{ runner.os }}
+          path: dist
+
+  MacOS:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install poetry
+      run: pipx install poetry
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.8
+        cache: 'poetry'
+    - name: Install tkinter
+      run: |
+        brew install python-tk
+    - name: Install dependencies
+      run: |
+        poetry install
+    - name: Test
+      run: |
+        poetry run test
+    - name: Build
+      run: |
+        poetry run pyinstaller --onefile --windowed --hidden-import='PIL._tkinter_finder' inbac/inbac.py
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+          name: inbac-${{ runner.os }}
+          path: dist

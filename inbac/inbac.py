@@ -17,6 +17,8 @@ class Application():
 
         if args.input_dir is None:
             args.input_dir = filedialog.askdirectory(parent=master)
+            if args.input_dir == () or args.input_dir == "" or args.input_dir is None:
+                raise ValueError("No input directory specified")
         args.output_dir = getattr(
             args, "output_dir", os.path.join(args.input_dir, "crops"))
 

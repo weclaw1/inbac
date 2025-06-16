@@ -37,29 +37,27 @@ class TestInbac(unittest.TestCase):
         self.assertEqual(new_filename, returned_filename)
 
     def test_selection_box_for_aspect_ratio_returns_box_with_aspect_ratio(self):
-        aspect_ratio = 16.0/9.0
-        mouse_press_coord = (0.0, 0.0)
-        mouse_move_coord = (15.0, 9.0)
-        selection_box = (0.0, 0.0, 15.0, 9.0)
-        expected_selection_box = (0.0, 0.0, 16.0, 9.0)
+        aspect_ratio = 16 / 9
+        mouse_press_coord = (0, 0)
+        mouse_move_coord = (15, 9)
+        selection_box = (0, 0, 15, 9)
+        expected_selection_box = (0, 0, 16, 9)
         returned_selection_box = Controller.get_selection_box_for_aspect_ratio(selection_box, aspect_ratio,
                                                                                 mouse_press_coord, mouse_move_coord)
         self.assertEqual(expected_selection_box, returned_selection_box)
 
     def test_get_selected_box_returns_correct_selection_box_when_selecting_from_upper_left_to_bottom_right(self):
-        mouse_press_coord = (0.0, 0.0)
-        mouse_move_coord = (15.0, 9.0)
-        expected_selection_box = (0.0, 0.0, 15.0, 9.0)
-        returned_selection_box = Controller.get_selected_box(
-            mouse_press_coord, mouse_move_coord, None)
+        mouse_press_coord = (0, 0)
+        mouse_move_coord = (15, 9)
+        expected_selection_box = (0, 0, 15, 9)
+        returned_selection_box = Controller.get_selected_box(None, None, mouse_press_coord, mouse_move_coord, None)
         self.assertEqual(expected_selection_box, returned_selection_box)
 
     def test_get_selected_box_returns_correct_selection_box_when_selecting_from_bottom_right_to_upper_left(self):
-        mouse_press_coord = (15.0, 9.0)
-        mouse_move_coord = (0.0, 0.0)
-        expected_selection_box = (0.0, 0.0, 15.0, 9.0)
-        returned_selection_box = Controller.get_selected_box(
-            mouse_press_coord, mouse_move_coord, None)
+        mouse_press_coord = (15, 9)
+        mouse_move_coord = (0, 0)
+        expected_selection_box = (0, 0, 15, 9)
+        returned_selection_box = Controller.get_selected_box(None, None, mouse_press_coord, mouse_move_coord, None)
         self.assertEqual(expected_selection_box, returned_selection_box)
 
     def test_get_real_box(self):
@@ -151,10 +149,8 @@ class TestInbac(unittest.TestCase):
     def test_calculate_canvas_image_dimensions(self):
         image_width = 1000
         image_height = 500
-        canvas_width = 500
-        canvas_height = 400
-        (new_width, new_height) = Controller.calculate_canvas_image_dimensions(image_width, image_height, 
-                                                                               canvas_width, canvas_height)
+        scaling_ratio = 0.5
+        (new_width, new_height) = Controller.calculate_canvas_image_dimensions(image_width, image_height, scaling_ratio)
         self.assertEqual(image_width / 2, new_width)
         self.assertEqual(image_height / 2, new_height)
 

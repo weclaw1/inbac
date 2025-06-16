@@ -1,6 +1,23 @@
 import argparse
 
 
+class FixedSizeAction(argparse.Action):
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+        if nargs is not None:
+            raise ValueError("nargs not allowed")
+
+        super().__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parser, namespace, value, option_string=None):
+        list_val = getattr(namespace, self.dest, [])
+
+        parts = value.split('x')
+        if len(parts) != 2:
+            raise ValueError(f"fixed_size format example: 1024x768. Gotten value '{value}' is invalid")
+        list_val.append((int(parts[0]), int(parts[1])))
+
+        setattr(namespace, self.dest, list_val)
+
 def parse_arguments():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -46,6 +63,17 @@ Left Arrow or Middle Mouse Button - go to previous picture\n"""
         default=[
             800,
             600])
+    parser.add_argument(
+        "--fixed_size",
+        action=FixedSizeAction,
+        default=[],
+        dest='fixed_sizes',
+        help="a fixed crop size to use (example: 1920x1080): may be specified multiple times")
+    parser.add_argument(
+        "--copy_tag_files",
+        action="store_true",
+        default=False,
+        help="if set, copy any .txt file with the same basename to the output directory and name it like the crop")
     parser.add_argument("-f", "--image_format",
                         help="define the croped image format")
     parser.add_argument("-q", "--image_quality", type=int,

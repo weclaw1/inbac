@@ -1,0 +1,22 @@
+{
+	"name": "Inbac",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+
+	"containerEnv": {
+		"SHELL": "/bin/bash"
+	},
+
+	"mounts": [
+		"source=${localEnv:HOME},target=/home/${localEnv:USER},type=bind,consistency=cached"
+	],
+	
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python"
+			]
+		}
+	}
+}
