@@ -182,7 +182,7 @@ class Controller():
         saved_image.save(
             os.path.join(
                 self.model.args.output_dir,
-                new_filename),
+                new_filename + "." + self.model.args.image_format),
             self.model.args.image_format,
             quality=self.model.args.image_quality)
 
@@ -247,19 +247,12 @@ class Controller():
         return (coordinates[0] > selection_box[0] and coordinates[0] < selection_box[2]
                 and coordinates[1] > selection_box[1] and coordinates[1] < selection_box[3])
 
-    @staticmethod
-    def find_available_name(directory: str, filename: str) -> str:
+    def find_available_name(self, directory: str, filename: str) -> str:
         name, extension = os.path.splitext(filename)
-        if not os.path.isfile(os.path.join(directory, filename)):
-            return filename
-        for num in itertools.count(2):
-            if not os.path.isfile(
-                os.path.join(
-                    directory,
-                    name +
-                    str(num) +
-                    extension)):
-                return name + str(num) + extension
+        for num in itertools.count(0):
+            cont = name + "_" + str(num) + "." + self.model.args.image_format
+            if not os.path.isfile(os.path.join(directory, cont)):
+                return cont
         raise ValueError("No available name found")
 
     @staticmethod
